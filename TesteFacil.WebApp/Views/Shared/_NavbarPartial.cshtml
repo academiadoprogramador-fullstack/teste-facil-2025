@@ -1,0 +1,31 @@
+﻿@{
+    var rotaDisciplinasAtiva = ViewContext.HttpContext.Request.Path.StartsWithSegments("/disciplinas") ? "btn btn-primary px-3" : "nav-link text-primary fw-semibold";
+    var rotaMateriasAtiva = ViewContext.HttpContext.Request.Path.StartsWithSegments("/materias") ? "btn btn-primary px-3" : "nav-link text-primary fw-semibold";
+    var rotaQuestoesAtiva = ViewContext.HttpContext.Request.Path.StartsWithSegments("/questoes") ? "btn btn-primary px-3" : "nav-link text-primary fw-semibold";
+    var rotaTestesAtiva = ViewContext.HttpContext.Request.Path.StartsWithSegments("/testes") ? "btn btn-primary px-3" : "nav-link text-primary fw-semibold";
+}
+
+<nav class="navbar navbar-expand-lg bg-light">
+    <div class="container">
+        <a class="navbar-brand fs-4 fw-bold" href="/">Teste Fácil</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav gap-2 ms-auto">
+                <li class="nav-item">
+                    <a class="@rotaDisciplinasAtiva" href="/disciplinas">Disciplinas</a>
+                </li>
+                <li class="nav-item">
+                    <a class="@rotaMateriasAtiva" href="/materias">Matérias</a>
+                </li>
+                <li class="nav-item">
+                    <a class="@rotaQuestoesAtiva" href="/questoes">Questões</a>
+                </li>
+                <li class="nav-item">
+                    <a class="@rotaTestesAtiva" href="/testes">Testes</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

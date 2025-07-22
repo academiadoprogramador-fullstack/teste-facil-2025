@@ -1,0 +1,66 @@
+﻿@using TesteFacil.Dominio.ModuloMateria
+
+@model PrimeiraEtapaGerarTesteViewModel
+
+@{
+    ViewBag.Titulo = "Geração de Teste";
+}
+
+<hr />
+<div class="row justify-content-center my-5">
+    <div class="col-md-8">
+        <div class="card rounded-4 border-0">
+            <div class="card-body p-md-5">
+                <form asp-action="PrimeiraEtapaGerar">
+                    <h3>Formulário de Geração de Teste</h3>
+
+                    @if (ViewData.ModelState["CadastroUnico"]?.Errors.Count > 0)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
+                            @ViewData.ModelState["CadastroUnico"]!.Errors.First().ErrorMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
+
+                    <div class="form-group d-grid gap-2 mt-3">
+                        <label asp-for="Titulo" class="control-label fs-5">Titulo:</label>
+                        <input asp-for="Titulo" class="form-control" />
+                        <span asp-validation-for="Titulo" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group d-grid gap-2 mt-3">
+                        <label asp-for="DisciplinaId" class="control-label fs-5">Disciplina:</label>
+                        <select asp-for="DisciplinaId" asp-items="@Model.DisciplinasDisponiveis" class="form-select"></select>
+                        <span asp-validation-for="DisciplinaId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group d-grid gap-2 mt-3">
+                        <label asp-for="Serie" class="control-label fs-5">Série:</label>
+                        <select asp-for="Serie" asp-items="@Html.GetEnumSelectList<SerieMateria>()" class="form-select"></select>
+                        <span asp-validation-for="Serie" class="text-danger"></span>
+                    </div>
+
+                    <div class="col col-md-4 form-group d-grid gap-2 mt-3">
+                        <label asp-for="QuantidadeQuestoes" class="control-label fs-5">Quantidade de Questões:</label>
+                        <input asp-for="QuantidadeQuestoes" type="number" class="form-control" />
+                        <span asp-validation-for="QuantidadeQuestoes" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group d-flex gap-2 mt-3">
+                        @Html.CheckBoxFor(x => x.Recuperacao, new { @class = "form-check-input" })
+                        <label asp-for="Recuperacao" class="form-check-label">Teste de Recuperacão</label>
+                    </div>
+
+                    <div class="form-group d-flex align-items-center justify-content-end gap-3 mt-5">
+                        <a asp-action="Index">Voltar para a listagem</a>
+                        <button type="submit" class="btn btn-primary rounded-3 px-5">Confirmar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}

@@ -1,0 +1,48 @@
+﻿@using TesteFacil.Dominio.Extensions
+@model VisualizarMateriasViewModel
+
+@{
+    ViewBag.Titulo = "Visualização de Materias";
+}
+
+<p>
+    <a class="btn btn-primary px-4" asp-action="Cadastrar">
+        <i class="bi bi-plus"></i>
+        Cadastrar Novo/a
+    </a>
+</p>
+
+<hr />
+
+<div class="d-flex flex-wrap gap-2">
+    @foreach (var registro in Model.Registros)
+    {
+        <div class="col-12 col-md-3">
+            <div class="card border-0">
+                <div class="card-body">
+                    <h5 class="card-title">@registro.Nome</h5>
+
+                    <p class="card-text mb-0">
+                        <span class="fw-semibold">Série:</span> @registro.Serie.GetDisplayName()
+                    </p>
+
+                    <p class="card-text mb-0">
+                        <span class="fw-semibold">Disciplina:</span> @registro.Disciplina
+                    </p>
+
+                    <span class="d-flex gap-1 justify-content-end mt-4">
+                        <a asp-action="Detalhes" asp-route-id="@registro.Id" class="btn btn-secondary rounded-circle card-option" title="Detalhes">
+                            <i class="bi bi-search"></i>
+                        </a>
+                        <a asp-action="Editar" asp-route-id="@registro.Id" class="btn btn-primary rounded-circle card-option" title="Edição">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <a asp-action="Excluir" asp-route-id="@registro.Id" class="btn btn-danger rounded-circle card-option" title="Exclusão">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    }
+</div>
