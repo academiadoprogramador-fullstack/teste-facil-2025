@@ -37,7 +37,14 @@ public class Program
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
+        {
             app.ApplyMigrations();
+
+            app.UseDeveloperExceptionPage();
+        }
+
+        if (app.Environment.IsProduction())
+            app.UseExceptionHandler("/erro");
 
         app.UseAntiforgery();
         app.UseStaticFiles();
