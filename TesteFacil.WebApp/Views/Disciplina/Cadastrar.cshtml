@@ -12,10 +12,10 @@
                 <form asp-action="Cadastrar">
                     <h3>Formulário de Cadastro</h3>
 
-                    @if (ViewData.ModelState["CadastroUnico"]?.Errors.Count > 0)
+                    @if (ViewData.ModelState["BadRequest"]?.Errors.Count > 0)
                     {
                         <div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
-                            @ViewData.ModelState["CadastroUnico"]!.Errors.First().ErrorMessage
+                            @ViewData.ModelState["BadRequest"]!.Errors.First().ErrorMessage
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                         </div>
                     }

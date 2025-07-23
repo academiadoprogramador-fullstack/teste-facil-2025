@@ -2,17 +2,20 @@
 using TesteFacil.Dominio.Compartilhado;
 using TesteFacil.Dominio.ModuloDisciplina;
 using TesteFacil.WebApp.Models;
+using TesteFacil.WebApp.Services;
 
 namespace TesteFacil.WebApp.Controllers;
 
 [Route("disciplinas")]
 public class DisciplinaController : Controller
 {
+    private readonly DisciplinaService disciplinaService;
     private readonly IRepositorioDisciplina repositorioDisciplina;
     private readonly IUnitOfWork unitOfWork;
     private readonly ILogger<DisciplinaController> logger;
 
     public DisciplinaController(
+        DisciplinaService disciplinaService,
         IRepositorioDisciplina repositorioDisciplina,
         IUnitOfWork unitOfWork,
         ILogger<DisciplinaController> logger
@@ -20,6 +23,7 @@ public class DisciplinaController : Controller
     {
         this.unitOfWork = unitOfWork;
         this.logger = logger;
+        this.disciplinaService = disciplinaService;
         this.repositorioDisciplina = repositorioDisciplina;
     }
 
@@ -45,35 +49,22 @@ public class DisciplinaController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Cadastrar(CadastrarDisciplinaViewModel cadastrarVM)
     {
-        var registros = repositorioDisciplina.SelecionarRegistros();
+        var entidade = FormularioDisciplinaViewModel.ParaEntidade(cadastrarVM);
 
-        if (registros.Any(i => i.Nome.Equals(cadastrarVM.Nome)))
+        var resultado = disciplinaService.Cadastrar(entidade);
+
+        if (resultado.IsFailed)
         {
-            ModelState.AddModelError(
-                "CadastroUnico",
-                "Já existe uma disciplina registrada com este nome."
-            );
+            foreach (var erro in resultado.Errors)
+            {
+                if (erro.Metadata["ErrorType"].ToString() == "BadRequest")
+                {
+                    ModelState.AddModelError("BadRequest", erro.Reasons.First().Message);
+                    break;
+                }
+            }
 
             return View(cadastrarVM);
-        }
-
-        try
-        {
-            var entidade = FormularioDisciplinaViewModel.ParaEntidade(cadastrarVM);
-
-            repositorioDisciplina.Cadastrar(entidade);
-
-            unitOfWork.Commit();
-        }
-        catch (Exception ex)
-        {
-            unitOfWork.Rollback();
-
-            logger.LogError(
-                ex,
-                "Ocorreu um erro durante o registro de {@ViewModel}.",
-                cadastrarVM
-            );
         }
 
         return RedirectToAction(nameof(Index));
@@ -99,35 +90,22 @@ public class DisciplinaController : Controller
     [ValidateAntiForgeryToken]
     public ActionResult Editar(Guid id, EditarDisciplinaViewModel editarVM)
     {
-        var registros = repositorioDisciplina.SelecionarRegistros();
+        var entidadeEditada = FormularioDisciplinaViewModel.ParaEntidade(editarVM);
 
-        if (registros.Any(i => !i.Id.Equals(editarVM.Id) && i.Nome.Equals(editarVM.Nome)))
+        var resultado = disciplinaService.Editar(id, entidadeEditada);
+
+        if (resultado.IsFailed)
         {
-            ModelState.AddModelError(
-                "CadastroUnico",
-                "Já existe uma disciplina registrada com este nome."
-            );
-            
+            foreach (var erro in resultado.Errors)
+            {
+                if (erro.Metadata["ErrorType"].ToString() == "BadRequest")
+                {
+                    ModelState.AddModelError("BadRequest", erro.Reasons.First().Message);
+                    break;
+                }
+            }
+
             return View(editarVM);
-        }
-
-        try
-        {
-            var entidadeEditada = FormularioDisciplinaViewModel.ParaEntidade(editarVM);
-
-            repositorioDisciplina.Editar(id, entidadeEditada);
-
-            unitOfWork.Commit();
-        }
-        catch (Exception ex)
-        {
-            unitOfWork.Rollback();
-
-            logger.LogError(
-                ex,
-                "Ocorreu um erro durante a edição do registro {@ViewModel}.",
-                editarVM
-            );
         }
 
         return RedirectToAction(nameof(Index));

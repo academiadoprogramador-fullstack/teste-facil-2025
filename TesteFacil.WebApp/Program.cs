@@ -9,6 +9,7 @@ using TesteFacil.Infraestrutura.Orm.ModuloTeste;
 using TesteFacil.WebApp.ActionFilters;
 using TesteFacil.WebApp.DependencyInjection;
 using TesteFacil.WebApp.Orm;
+using TesteFacil.WebApp.Services;
 
 namespace TesteFacil.WebApp;
 
@@ -20,6 +21,7 @@ public class Program
 
         if (builder.Environment.IsDevelopment())
         {
+            builder.Services.AddScoped<DisciplinaService>();
             builder.Services.AddScoped<IRepositorioDisciplina, RepositorioDisciplinaEmOrm>();
             builder.Services.AddScoped<IRepositorioMateria, RepositorioMateriaEmOrm>();
             builder.Services.AddScoped<IRepositorioQuestao, RepositorioQuestaoEmOrm>();
