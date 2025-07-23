@@ -1,3 +1,4 @@
+using TesteFacil.Aplicacao;
 using TesteFacil.Dominio.ModuloDisciplina;
 using TesteFacil.Dominio.ModuloMateria;
 using TesteFacil.Dominio.ModuloQuestao;
@@ -20,6 +21,7 @@ public class Program
 
         if (builder.Environment.IsDevelopment())
         {
+            builder.Services.AddScoped<DisciplinaService>();
             builder.Services.AddScoped<IRepositorioDisciplina, RepositorioDisciplinaEmOrm>();
             builder.Services.AddScoped<IRepositorioMateria, RepositorioMateriaEmOrm>();
             builder.Services.AddScoped<IRepositorioQuestao, RepositorioQuestaoEmOrm>();

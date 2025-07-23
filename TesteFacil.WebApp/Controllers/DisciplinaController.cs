@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TesteFacil.Dominio.Compartilhado;
-using TesteFacil.Dominio.ModuloDisciplina;
+using TesteFacil.Aplicacao;
 using TesteFacil.WebApp.Models;
 
 namespace TesteFacil.WebApp.Controllers;
@@ -8,25 +7,22 @@ namespace TesteFacil.WebApp.Controllers;
 [Route("disciplinas")]
 public class DisciplinaController : Controller
 {
-    private readonly IRepositorioDisciplina repositorioDisciplina;
-    private readonly IUnitOfWork unitOfWork;
-    private readonly ILogger<DisciplinaController> logger;
+    private readonly DisciplinaService disciplinaService;
 
-    public DisciplinaController(
-        IRepositorioDisciplina repositorioDisciplina,
-        IUnitOfWork unitOfWork,
-        ILogger<DisciplinaController> logger
-    )
+    public DisciplinaController(DisciplinaService disciplinaService)
     {
-        this.unitOfWork = unitOfWork;
-        this.logger = logger;
-        this.repositorioDisciplina = repositorioDisciplina;
+        this.disciplinaService = disciplinaService;
     }
 
     [HttpGet]
     public IActionResult Index()
     {
-        var registros = repositorioDisciplina.SelecionarRegistros();
+        var resultado = disciplinaService.SelecionarTodos();
+
+        if (resultado.IsFailed)
+            return RedirectToAction("Home/Index");
+
+        var registros = resultado.Value;
 
         var visualizarVM = new VisualizarDisciplinasViewModel(registros);
 
@@ -45,35 +41,15 @@ public class DisciplinaController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult Cadastrar(CadastrarDisciplinaViewModel cadastrarVM)
     {
-        var registros = repositorioDisciplina.SelecionarRegistros();
+        var entidade = FormularioDisciplinaViewModel.ParaEntidade(cadastrarVM);
 
-        if (registros.Any(i => i.Nome.Equals(cadastrarVM.Nome)))
+        var resultado = disciplinaService.Cadastrar(entidade);
+
+        if (resultado.IsFailed)
         {
-            ModelState.AddModelError(
-                "CadastroUnico",
-                "Já existe uma disciplina registrada com este nome."
-            );
+            ModelState.AddModelError("CadastroUnico", resultado.Errors[0].Message);
 
             return View(cadastrarVM);
-        }
-
-        try
-        {
-            var entidade = FormularioDisciplinaViewModel.ParaEntidade(cadastrarVM);
-
-            repositorioDisciplina.Cadastrar(entidade);
-
-            unitOfWork.Commit();
-        }
-        catch (Exception ex)
-        {
-            unitOfWork.Rollback();
-
-            logger.LogError(
-                ex,
-                "Ocorreu um erro durante o registro de {@ViewModel}.",
-                cadastrarVM
-            );
         }
 
         return RedirectToAction(nameof(Index));
@@ -82,10 +58,12 @@ public class DisciplinaController : Controller
     [HttpGet("editar/{id:guid}")]
     public ActionResult Editar(Guid id)
     {
-        var registroSelecionado = repositorioDisciplina.SelecionarRegistroPorId(id);
+        var resultado = disciplinaService.SelecionarPorId(id);
 
-        if (registroSelecionado is null)
+        if (resultado.IsFailed)
             return RedirectToAction(nameof(Index));
+
+        var registroSelecionado = resultado.Value;
 
         var editarVM = new EditarDisciplinaViewModel(
             id,
@@ -99,35 +77,15 @@ public class DisciplinaController : Controller
     [ValidateAntiForgeryToken]
     public ActionResult Editar(Guid id, EditarDisciplinaViewModel editarVM)
     {
-        var registros = repositorioDisciplina.SelecionarRegistros();
+        var entidadeEditada = FormularioDisciplinaViewModel.ParaEntidade(editarVM);
 
-        if (registros.Any(i => !i.Id.Equals(editarVM.Id) && i.Nome.Equals(editarVM.Nome)))
+        var resultado = disciplinaService.Editar(id, entidadeEditada);
+
+        if (resultado.IsFailed)
         {
-            ModelState.AddModelError(
-                "CadastroUnico",
-                "Já existe uma disciplina registrada com este nome."
-            );
-            
+            ModelState.AddModelError("CadastroUnico", resultado.Errors[0].Message);
+
             return View(editarVM);
-        }
-
-        try
-        {
-            var entidadeEditada = FormularioDisciplinaViewModel.ParaEntidade(editarVM);
-
-            repositorioDisciplina.Editar(id, entidadeEditada);
-
-            unitOfWork.Commit();
-        }
-        catch (Exception ex)
-        {
-            unitOfWork.Rollback();
-
-            logger.LogError(
-                ex,
-                "Ocorreu um erro durante a edição do registro {@ViewModel}.",
-                editarVM
-            );
         }
 
         return RedirectToAction(nameof(Index));
@@ -136,10 +94,12 @@ public class DisciplinaController : Controller
     [HttpGet("excluir/{id:guid}")]
     public IActionResult Excluir(Guid id)
     {
-        var registroSelecionado = repositorioDisciplina.SelecionarRegistroPorId(id);
+        var resultado = disciplinaService.SelecionarPorId(id);
 
-        if (registroSelecionado is null)
+        if (resultado.IsFailed)
             return RedirectToAction(nameof(Index));
+
+        var registroSelecionado = resultado.Value;
 
         var excluirVM = new ExcluirDisciplinaViewModel(
             registroSelecionado.Id,
@@ -153,41 +113,21 @@ public class DisciplinaController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult ExcluirConfirmado(Guid id)
     {
-        try
-        {
-            repositorioDisciplina.Excluir(id);
-
-            unitOfWork.Commit();
-        }
-        catch (Exception ex)
-        {
-            unitOfWork.Rollback();
-
-            logger.LogError(
-                ex,
-                "Ocorreu um erro durante a exclusão do registro {Id}.",
-                id
-            );
-        }
+        disciplinaService.Excluir(id);
 
         return RedirectToAction(nameof(Index));
     }
 
-
     [HttpGet("detalhes/{id:guid}")]
     public IActionResult Detalhes(Guid id)
     {
-        var registroSelecionado = repositorioDisciplina.SelecionarRegistroPorId(id);
-
-        if (registroSelecionado is null)
+        var resultado = disciplinaService.SelecionarPorId(id);
+        
+        if (resultado.IsFailed)
             return RedirectToAction(nameof(Index));
 
-        var detalhesVM = new DetalhesDisciplinaViewModel(
-            id,
-            registroSelecionado.Nome,
-            registroSelecionado.Materias
-        );
+        var detalhesVm = DetalhesDisciplinaViewModel.ParaDetalhesVm(resultado.Value);
 
-        return View(detalhesVM);
+        return View(detalhesVm);
     }
 }
