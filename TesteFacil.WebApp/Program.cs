@@ -1,4 +1,4 @@
-using TesteFacil.Aplicacao;
+using TesteFacil.Aplicacao.ModuloDisciplina;
 using TesteFacil.Dominio.ModuloDisciplina;
 using TesteFacil.Dominio.ModuloMateria;
 using TesteFacil.Dominio.ModuloQuestao;

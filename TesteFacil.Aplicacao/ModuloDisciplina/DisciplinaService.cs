@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using TesteFacil.Dominio.Compartilhado;
 using TesteFacil.Dominio.ModuloDisciplina;
 
-namespace TesteFacil.Aplicacao;
+namespace TesteFacil.Aplicacao.ModuloDisciplina;
 
 public class DisciplinaService
 {
@@ -34,6 +34,8 @@ public class DisciplinaService
             repositorioDisciplina.Cadastrar(disciplina);
 
             unitOfWork.Commit();
+
+            return Result.Ok();
         }
         catch (Exception ex)
         {
@@ -41,12 +43,12 @@ public class DisciplinaService
 
             logger.LogError(
                 ex,
-                "Ocorreu um erro durante o registro de {@ViewModel}.",
+                "Ocorreu um erro durante o registro de {@Registro}.",
                 disciplina
             );
-        }
 
-        return Result.Ok();
+            return Result.Fail("Ocorreu um erro inesperado ao tentar cadastrar o registro.");
+        }
     }
 
     public Result Editar(Guid id, Disciplina disciplinaEditada)
@@ -61,6 +63,8 @@ public class DisciplinaService
             repositorioDisciplina.Editar(id, disciplinaEditada);
 
             unitOfWork.Commit();
+
+            return Result.Ok();
         }
         catch (Exception ex)
         {
@@ -68,12 +72,12 @@ public class DisciplinaService
 
             logger.LogError(
                 ex,
-                "Ocorreu um erro durante a edição do registro {@ViewModel}.",
+                "Ocorreu um erro durante a edição do registro {@Registro}.",
                 disciplinaEditada
             );
-        }
 
-        return Result.Ok();
+            return Result.Fail("Ocorreu um erro inesperado ao tentar editar o registro.");
+        }
     }
 
     public Result Excluir(Guid id)
@@ -83,6 +87,9 @@ public class DisciplinaService
             repositorioDisciplina.Excluir(id);
 
             unitOfWork.Commit();
+
+            return Result.Ok();
+
         }
         catch (Exception ex)
         {
@@ -93,40 +100,50 @@ public class DisciplinaService
                 "Ocorreu um erro durante a exclusão do registro {Id}.",
                 id
             );
-        }
 
-        return Result.Ok();
+            return Result.Fail("Ocorreu um erro inesperado ao tentar excluir o registro.");
+        }
     }
 
     public Result<Disciplina> SelecionarPorId(Guid id)
     {
-        var registroSelecionado = repositorioDisciplina.SelecionarRegistroPorId(id);
+        try
+        {
+            var registroSelecionado = repositorioDisciplina.SelecionarRegistroPorId(id);
 
-        if (registroSelecionado is null)
-            return Result.Fail("Não foi possível encontrar o registro.");
+            if (registroSelecionado is null)
+                return Result.Fail("Não foi possível obter o registro.");
 
-        return registroSelecionado;
+            return Result.Ok(registroSelecionado);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Ocorreu um erro durante a seleção do registro {Id}.",
+                id
+            );
+
+            return Result.Fail("Ocorreu um erro inesperado ao tentar obter o registro.");
+        }
     }
 
     public Result<List<Disciplina>> SelecionarTodos()
     {
-        var registros = new List<Disciplina>();
-
         try
         {
-            registros = repositorioDisciplina.SelecionarRegistros();
+            var registros = repositorioDisciplina.SelecionarRegistros();
 
             return Result.Ok(registros);
         }
         catch (Exception ex)
         {
-
             logger.LogError(
                 ex,
                 "Ocorreu um erro durante a seleção de registros."
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter os registros.");
+            return Result.Fail("Ocorreu um erro inesperado ao tentar obter o registros.");
         }
     }
 }

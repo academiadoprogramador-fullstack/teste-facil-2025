@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TesteFacil.Aplicacao;
+using TesteFacil.Aplicacao.ModuloDisciplina;
 using TesteFacil.WebApp.Models;
 
 namespace TesteFacil.WebApp.Controllers;
