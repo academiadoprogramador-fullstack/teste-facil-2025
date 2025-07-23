@@ -65,6 +65,24 @@ public class TesteController : Controller
     [HttpPost("gerar/primeira-etapa")]
     public IActionResult PrimeiraEtapaGerar(PrimeiraEtapaGerarTesteViewModel primeiraEtapaVm)
     {
+        var registros = repositorioTeste.SelecionarRegistros();
+
+        var disciplinas = repositorioDisciplina.SelecionarRegistros();
+
+        if (registros.Any(i => i.Titulo.Equals(primeiraEtapaVm.Titulo)))
+        {
+            ModelState.AddModelError(
+                "CadastroUnico",
+                "Já existe um teste registrado com este nome."
+            );
+
+            primeiraEtapaVm.DisciplinasDisponiveis = disciplinas
+                .Select(d => new SelectListItem(d.Nome, d.Id.ToString()))
+                .ToList();
+
+            return View(primeiraEtapaVm);
+        }
+
         var disciplinaSelecionada = repositorioDisciplina.SelecionarRegistroPorId(primeiraEtapaVm.DisciplinaId);
 
         if (disciplinaSelecionada is null)
@@ -106,33 +124,21 @@ public class TesteController : Controller
     [HttpPost("gerar/segunda-etapa/sortear-questoes")]
     public IActionResult SortearQuestoes(SegundaEtapaGerarTesteViewModel segundaEtapaVm)
     {
-        List<Questao> questoesSorteadas;
+        var disciplinas = repositorioDisciplina.SelecionarRegistros();
+        var materias = repositorioMateria.SelecionarRegistros();
+        var questoes = repositorioQuestao.SelecionarRegistros();
 
-        if (segundaEtapaVm.Recuperacao)
-        {
-            questoesSorteadas = repositorioQuestao.SelecionarQuestoesPorDisciplinaESerie(
-                segundaEtapaVm.DisciplinaId,
-                segundaEtapaVm.Serie,
-                segundaEtapaVm.QuantidadeQuestoes
-            );
-        }
-        else
-        {
-            if (!segundaEtapaVm.MateriaId.HasValue)
-                throw new InvalidOperationException("Não foi possível obter o ID da matéria selecionada.");
+        var entidade = SegundaEtapaGerarTesteViewModel.ParaEntidade(
+            segundaEtapaVm,
+            disciplinas,
+            materias,
+            questoes
+        );
 
-            questoesSorteadas = repositorioQuestao.SelecionarQuestoesPorMateria(
-                segundaEtapaVm.MateriaId.Value,
-                segundaEtapaVm.QuantidadeQuestoes
-            );
+        var questoesSorteadas = entidade.SortearQuestoes();
 
-            segundaEtapaVm.MateriasDisponiveis = repositorioMateria
-                .SelecionarRegistros()
-                .Where(m => m.Disciplina.Id.Equals(segundaEtapaVm.DisciplinaId))
-                .Where(m => m.Serie.Equals(segundaEtapaVm.Serie))
-                .Select(m => new SelectListItem(m.Nome, m.Id.ToString()))
-                .ToList();
-        }
+        if (questoesSorteadas is null)
+            return RedirectToAction(nameof(Index));
 
         segundaEtapaVm.QuestoesSorteadas = questoesSorteadas.Select(q => new DetalhesQuestaoViewModel(
             q.Id,
@@ -143,12 +149,60 @@ public class TesteController : Controller
             q.Alternativas
         )).ToList();
 
+        segundaEtapaVm.MateriasDisponiveis = repositorioMateria
+            .SelecionarRegistros()
+            .Where(m => m.Disciplina.Id.Equals(segundaEtapaVm.DisciplinaId))
+            .Where(m => m.Serie.Equals(segundaEtapaVm.Serie))
+            .Select(m => new SelectListItem(m.Nome, m.Id.ToString()))
+            .ToList();
+
         return View(nameof(SegundaEtapaGerar), segundaEtapaVm);
     }
 
     [HttpPost("gerar/confirmar")]
     public IActionResult ConfirmarGeracao(SegundaEtapaGerarTesteViewModel segundaEtapaVm)
     {
-        return View();
+        var disciplinas = repositorioDisciplina.SelecionarRegistros();
+        var materias = repositorioMateria.SelecionarRegistros();
+        var questoes = repositorioQuestao.SelecionarRegistros();
+
+        try
+        {
+            var entidade = SegundaEtapaGerarTesteViewModel.ParaEntidade(
+                segundaEtapaVm,
+                disciplinas,
+                materias,
+                questoes
+            );
+
+            repositorioTeste.Cadastrar(entidade);
+
+            unitOfWork.Commit();
+        }
+        catch (Exception ex)
+        {
+            unitOfWork.Rollback();
+
+            logger.LogError(
+                ex,
+                "Ocorreu um erro durante o registro de {@ViewModel}.",
+                segundaEtapaVm
+            );
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet("detalhes/{id:guid}")]
+    public IActionResult Detalhes(Guid id)
+    {
+        var registroSelecionado = repositorioTeste.SelecionarRegistroPorId(id);
+
+        if (registroSelecionado is null)
+            return RedirectToAction(nameof(Index));
+
+        var detalhesVM = DetalhesTesteViewModel.ParaDetalhesVm(registroSelecionado);
+
+        return View(detalhesVM);
     }
 }

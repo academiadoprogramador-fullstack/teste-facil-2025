@@ -157,6 +157,11 @@ public class DetalhesQuestaoViewModel
     public string RespostaCorreta { get; set; }
     public List<AlternativaQuestaoViewModel> Alternativas { get; set; }
 
+    public DetalhesQuestaoViewModel()
+    {
+        Alternativas = new List<AlternativaQuestaoViewModel>();
+    }
+
     public DetalhesQuestaoViewModel(
         Guid id,
         string enunciado,
@@ -164,7 +169,7 @@ public class DetalhesQuestaoViewModel
         string utilizadaEmTeste,
         string respostaCorreta,
         List<Alternativa> alternativas
-    )
+    ) : this()
     {
         Id = id;
         Enunciado = enunciado;

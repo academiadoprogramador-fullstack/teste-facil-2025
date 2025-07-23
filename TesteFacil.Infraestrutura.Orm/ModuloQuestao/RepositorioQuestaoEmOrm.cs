@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TesteFacil.Dominio.ModuloDisciplina;
 using TesteFacil.Dominio.ModuloMateria;
 using TesteFacil.Dominio.ModuloQuestao;
 using TesteFacil.Infraestrutura.Orm.Compartilhado;

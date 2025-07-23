@@ -13,7 +13,7 @@ public class PrimeiraEtapaGerarTesteViewModel
     [Required(ErrorMessage = "O campo \"Título\" é obrigatório.")]
     [MinLength(2, ErrorMessage = "O campo \"Título\" precisa conter ao menos 2 caracteres.")]
     [MaxLength(100, ErrorMessage = "O campo \"Título\" precisa conter no máximo 100 caracteres.")]
-    public string? Titulo { get; set; }
+    public string Titulo { get; set; }
 
     [Required(ErrorMessage = "O campo \"Disciplina\" é obrigatório.")]
     public Guid DisciplinaId { get; set; }
@@ -24,7 +24,7 @@ public class PrimeiraEtapaGerarTesteViewModel
     public List<SelectListItem>? SeriesMateriasDisponiveis { get; set; } = new List<SelectListItem>();
 
     [Required(ErrorMessage = "O campo \"Quantidade de Questões\" é obrigatório.")]
-    [Range(0, 100, ErrorMessage = "O campo \"Quantidade de Questões\" precisa conter um valor numérico entre 0 e 100.")]
+    [Range(1, 100, ErrorMessage = "O campo \"Quantidade de Questões\" precisa conter um valor numérico entre 1 e 100.")]
     public int QuantidadeQuestoes { get; set; }
     
     public bool Recuperacao { get; set; }
@@ -106,20 +106,6 @@ public class SegundaEtapaGerarTesteViewModel
     }
 }
 
-public class GerarTesteViewModel
-{
-    public required string Titulo { get; set; }
-    public required bool ProvaRecuperacao { get; set; }
-
-    public required Guid DisciplinaId { get; set; }
-    public required string Disciplina { get; set; }
-
-    public required Guid MateriaId { get; set; }
-    public required string Materia { get; set; }
-
-    public List<DetalhesQuestaoViewModel> QuestoesSorteadas { get; set; } = new List<DetalhesQuestaoViewModel>();
-}
-
 public class VisualizarTestesViewModel
 {
     public List<DetalhesTesteViewModel> Registros { get; set; }
@@ -135,6 +121,7 @@ public class VisualizarTestesViewModel
 public class DetalhesTesteViewModel
 {
     public required Guid Id { get; set; }
+    public required string DataGeracao { get; set; }
     public required string Titulo { get; set; }
     public required string Disciplina { get; set; }
     public required string? Materia { get; set; }
@@ -147,6 +134,7 @@ public class DetalhesTesteViewModel
         return new DetalhesTesteViewModel
         {
             Id = teste.Id,
+            DataGeracao = teste.DataGeracao.ToShortDateString(),
             Titulo = teste.Titulo,
             Recuperacao = teste.Recuperacao ? "Sim" : "Não",
             Disciplina = teste.Disciplina.Nome,
