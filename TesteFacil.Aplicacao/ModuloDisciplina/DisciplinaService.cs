@@ -2,24 +2,32 @@
 using Microsoft.Extensions.Logging;
 using TesteFacil.Dominio.Compartilhado;
 using TesteFacil.Dominio.ModuloDisciplina;
+using TesteFacil.Dominio.ModuloMateria;
+using TesteFacil.Dominio.ModuloTeste;
 
 namespace TesteFacil.Aplicacao.ModuloDisciplina;
 
 public class DisciplinaService
 {
     private readonly IRepositorioDisciplina repositorioDisciplina;
+    private readonly IRepositorioMateria repositorioMateria;
+    private readonly IRepositorioTeste repositorioTeste;
     private readonly IUnitOfWork unitOfWork;
     private readonly ILogger<DisciplinaService> logger;
 
     public DisciplinaService(
         IRepositorioDisciplina repositorioDisciplina,
+        IRepositorioMateria repositorioMateria,
+        IRepositorioTeste repositorioTeste,
         IUnitOfWork unitOfWork,
         ILogger<DisciplinaService> logger
     )
     {
         this.repositorioDisciplina = repositorioDisciplina;
+        this.repositorioMateria = repositorioMateria;
         this.unitOfWork = unitOfWork;
         this.logger = logger;
+        this.repositorioTeste = repositorioTeste;
     }
 
     public Result Cadastrar(Disciplina disciplina)
@@ -84,6 +92,16 @@ public class DisciplinaService
     {
         try
         {
+            var materias = repositorioMateria.SelecionarRegistros();
+
+            if (materias.Any(m => m.Disciplina.Id.Equals(id)))
+                return Result.Fail("A disciplina não pôde ser excluída pois está em uma ou mais matérias ativas.");
+            
+            var testes = repositorioTeste.SelecionarRegistros();
+
+            if (testes.Any(t => t.Disciplina.Id.Equals(id)))
+                return Result.Fail("O teste não pôde ser excluído pois está em um ou mais testes ativos.");
+
             repositorioDisciplina.Excluir(id);
 
             unitOfWork.Commit();
