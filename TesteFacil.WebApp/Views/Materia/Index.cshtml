@@ -1,8 +1,11 @@
 ﻿@using TesteFacil.Dominio.Extensions
+
 @model VisualizarMateriasViewModel
 
 @{
     ViewBag.Titulo = "Visualização de Materias";
+
+    var notificacao = ViewData[nameof(NotificacaoViewModel)] as NotificacaoViewModel;
 }
 
 <p>
@@ -13,6 +16,14 @@
 </p>
 
 <hr />
+
+@if (notificacao is not null)
+{
+    <div class="alert alert-danger alert-dismissible fade show my-3" role="alert">
+        @notificacao.Mensagem
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
 
 <div class="d-flex flex-wrap gap-2">
     @foreach (var registro in Model.Registros)

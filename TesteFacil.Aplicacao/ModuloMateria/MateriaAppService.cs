@@ -3,43 +3,50 @@ using Microsoft.Extensions.Logging;
 using TesteFacil.Dominio.Compartilhado;
 using TesteFacil.Dominio.ModuloDisciplina;
 using TesteFacil.Dominio.ModuloMateria;
+using TesteFacil.Dominio.ModuloQuestao;
 using TesteFacil.Dominio.ModuloTeste;
 
-namespace TesteFacil.Aplicacao.ModuloDisciplina;
+namespace TesteFacil.Aplicacao.ModuloMateria;
 
-public class DisciplinaService
+public class MateriaAppService
 {
-    private readonly IRepositorioDisciplina repositorioDisciplina;
     private readonly IRepositorioMateria repositorioMateria;
+    private readonly IRepositorioDisciplina repositorioDisciplina;
+    private readonly IRepositorioQuestao repositorioQuestao;
     private readonly IRepositorioTeste repositorioTeste;
     private readonly IUnitOfWork unitOfWork;
-    private readonly ILogger<DisciplinaService> logger;
+    private readonly ILogger<MateriaAppService> logger;
 
-    public DisciplinaService(
+    public MateriaAppService(
         IRepositorioDisciplina repositorioDisciplina,
         IRepositorioMateria repositorioMateria,
+        IRepositorioQuestao repositorioQuestao,
         IRepositorioTeste repositorioTeste,
         IUnitOfWork unitOfWork,
-        ILogger<DisciplinaService> logger
-    )
+        ILogger<MateriaAppService> logger
+)
     {
         this.repositorioDisciplina = repositorioDisciplina;
         this.repositorioMateria = repositorioMateria;
-        this.unitOfWork = unitOfWork;
-        this.logger = logger;
+
+        this.repositorioQuestao = repositorioQuestao;
         this.repositorioTeste = repositorioTeste;
+
+        this.unitOfWork = unitOfWork;
+
+        this.logger = logger;
     }
 
-    public Result Cadastrar(Disciplina disciplina)
+    public Result Cadastrar(Materia materia)
     {
-        var registros = repositorioDisciplina.SelecionarRegistros();
+        var registros = repositorioMateria.SelecionarRegistros();
 
-        if (registros.Any(i => i.Nome.Equals(disciplina.Nome)))
-            return Result.Fail("Já existe uma disciplina registrada com este nome.");
+        if (registros.Any(i => i.Nome.Equals(materia.Nome)))
+            return Result.Fail("Já existe uma matéria registrada com este nome.");
 
         try
         {
-            repositorioDisciplina.Cadastrar(disciplina);
+            repositorioMateria.Cadastrar(materia);
 
             unitOfWork.Commit();
 
@@ -52,23 +59,23 @@ public class DisciplinaService
             logger.LogError(
                 ex,
                 "Ocorreu um erro durante o registro de {@Registro}.",
-                disciplina
+                materia
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar cadastrar o registro.");
+            return Result.Fail("Ocorreu um erro inesperado ao tentar cadastrar a entidade.");
         }
     }
 
-    public Result Editar(Guid id, Disciplina disciplinaEditada)
+    public Result Editar(Guid id, Materia materiaEditada)
     {
-        var registros = repositorioDisciplina.SelecionarRegistros();
+        var registros = repositorioMateria.SelecionarRegistros();
 
-        if (registros.Any(i => !i.Id.Equals(id) && i.Nome.Equals(disciplinaEditada.Nome)))
-            return Result.Fail("Já existe uma disciplina registrada com este nome.");
+        if (registros.Any(i => !i.Id.Equals(id) && i.Nome.Equals(materiaEditada.Nome)))
+            return Result.Fail("Já existe uma matéria registrada com este nome.");
 
         try
         {
-            repositorioDisciplina.Editar(id, disciplinaEditada);
+            repositorioMateria.Editar(id, materiaEditada);
 
             unitOfWork.Commit();
 
@@ -81,7 +88,7 @@ public class DisciplinaService
             logger.LogError(
                 ex,
                 "Ocorreu um erro durante a edição do registro {@Registro}.",
-                disciplinaEditada
+                materiaEditada
             );
 
             return Result.Fail("Ocorreu um erro inesperado ao tentar editar o registro.");
@@ -92,15 +99,15 @@ public class DisciplinaService
     {
         try
         {
-            var materias = repositorioMateria.SelecionarRegistros();
+            var questoes = repositorioQuestao.SelecionarRegistros();
 
-            if (materias.Any(m => m.Disciplina.Id.Equals(id)))
-                return Result.Fail("A disciplina não pôde ser excluída pois está em uma ou mais matérias ativas.");
-            
+            if (questoes.Any(m => m.Materia.Id.Equals(id)))
+                return Result.Fail("A matéria não pôde ser excluída pois está em uma ou mais questões ativas.");
+
             var testes = repositorioTeste.SelecionarRegistros();
 
-            if (testes.Any(t => t.Disciplina.Id.Equals(id)))
-                return Result.Fail("A disciplina não pôde ser excluída pois está em um ou mais testes ativos.");
+            if (testes.Any(t => t.Materia?.Id == id))
+                return Result.Fail("A matéria não pôde ser excluída pois está em um ou mais testes ativos.");
 
             repositorioDisciplina.Excluir(id);
 
@@ -123,11 +130,11 @@ public class DisciplinaService
         }
     }
 
-    public Result<Disciplina> SelecionarPorId(Guid id)
+    public Result<Materia> SelecionarPorId(Guid id)
     {
         try
         {
-            var registroSelecionado = repositorioDisciplina.SelecionarRegistroPorId(id);
+            var registroSelecionado = repositorioMateria.SelecionarRegistroPorId(id);
 
             if (registroSelecionado is null)
                 return Result.Fail("Não foi possível obter o registro.");
@@ -146,11 +153,11 @@ public class DisciplinaService
         }
     }
 
-    public Result<List<Disciplina>> SelecionarTodos()
+    public Result<List<Materia>> SelecionarTodos()
     {
         try
         {
-            var registros = repositorioDisciplina.SelecionarRegistros();
+            var registros = repositorioMateria.SelecionarRegistros();
 
             return Result.Ok(registros);
         }
