@@ -7,17 +7,17 @@ namespace TesteFacil.WebApp.Controllers;
 [Route("disciplinas")]
 public class DisciplinaController : Controller
 {
-    private readonly DisciplinaService disciplinaService;
+    private readonly DisciplinaAppService disciplinaAppService;
 
-    public DisciplinaController(DisciplinaService disciplinaService)
+    public DisciplinaController(DisciplinaAppService disciplinaAppService)
     {
-        this.disciplinaService = disciplinaService;
+        this.disciplinaAppService = disciplinaAppService;
     }
 
     [HttpGet]
     public IActionResult Index()
     {
-        var resultado = disciplinaService.SelecionarTodos();
+        var resultado = disciplinaAppService.SelecionarTodos();
 
         if (resultado.IsFailed)
             return RedirectToAction("Home/Index");
@@ -43,7 +43,7 @@ public class DisciplinaController : Controller
     {
         var entidade = FormularioDisciplinaViewModel.ParaEntidade(cadastrarVM);
 
-        var resultado = disciplinaService.Cadastrar(entidade);
+        var resultado = disciplinaAppService.Cadastrar(entidade);
 
         if (resultado.IsFailed)
         {
@@ -58,7 +58,7 @@ public class DisciplinaController : Controller
     [HttpGet("editar/{id:guid}")]
     public ActionResult Editar(Guid id)
     {
-        var resultado = disciplinaService.SelecionarPorId(id);
+        var resultado = disciplinaAppService.SelecionarPorId(id);
 
         if (resultado.IsFailed)
             return RedirectToAction(nameof(Index));
@@ -79,7 +79,7 @@ public class DisciplinaController : Controller
     {
         var entidadeEditada = FormularioDisciplinaViewModel.ParaEntidade(editarVM);
 
-        var resultado = disciplinaService.Editar(id, entidadeEditada);
+        var resultado = disciplinaAppService.Editar(id, entidadeEditada);
 
         if (resultado.IsFailed)
         {
@@ -94,7 +94,7 @@ public class DisciplinaController : Controller
     [HttpGet("excluir/{id:guid}")]
     public IActionResult Excluir(Guid id)
     {
-        var resultado = disciplinaService.SelecionarPorId(id);
+        var resultado = disciplinaAppService.SelecionarPorId(id);
 
         if (resultado.IsFailed)
             return RedirectToAction(nameof(Index));
@@ -113,7 +113,7 @@ public class DisciplinaController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult ExcluirConfirmado(Guid id)
     {
-        disciplinaService.Excluir(id);
+        disciplinaAppService.Excluir(id);
 
         return RedirectToAction(nameof(Index));
     }
@@ -121,7 +121,7 @@ public class DisciplinaController : Controller
     [HttpGet("detalhes/{id:guid}")]
     public IActionResult Detalhes(Guid id)
     {
-        var resultado = disciplinaService.SelecionarPorId(id);
+        var resultado = disciplinaAppService.SelecionarPorId(id);
         
         if (resultado.IsFailed)
             return RedirectToAction(nameof(Index));

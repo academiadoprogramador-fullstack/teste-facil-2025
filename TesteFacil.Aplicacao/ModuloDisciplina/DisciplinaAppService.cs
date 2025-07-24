@@ -5,16 +5,16 @@ using TesteFacil.Dominio.ModuloDisciplina;
 
 namespace TesteFacil.Aplicacao.ModuloDisciplina;
 
-public class DisciplinaService
+public class DisciplinaAppService
 {
     private readonly IRepositorioDisciplina repositorioDisciplina;
     private readonly IUnitOfWork unitOfWork;
-    private readonly ILogger<DisciplinaService> logger;
+    private readonly ILogger<DisciplinaAppService> logger;
 
-    public DisciplinaService(
+    public DisciplinaAppService(
         IRepositorioDisciplina repositorioDisciplina,
         IUnitOfWork unitOfWork,
-        ILogger<DisciplinaService> logger
+        ILogger<DisciplinaAppService> logger
     )
     {
         this.repositorioDisciplina = repositorioDisciplina;
