@@ -5,7 +5,6 @@ using TesteFacil.Dominio.Compartilhado;
 using TesteFacil.Dominio.ModuloDisciplina;
 using TesteFacil.Dominio.ModuloMateria;
 using TesteFacil.Dominio.ModuloTeste;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TesteFacil.Aplicacao.ModuloDisciplina;
 
@@ -28,7 +27,9 @@ public class DisciplinaAppService
         this.repositorioDisciplina = repositorioDisciplina;
         this.repositorioMateria = repositorioMateria;
         this.repositorioTeste = repositorioTeste;
+
         this.unitOfWork = unitOfWork;
+
         this.logger = logger;
     }
 
@@ -37,7 +38,7 @@ public class DisciplinaAppService
         var registros = repositorioDisciplina.SelecionarRegistros();
 
         if (registros.Any(i => i.Nome.Equals(disciplina.Nome)))
-            return Result.Fail("Já existe uma disciplina registrada com este nome.");
+            return Result.Fail(ResultadosErro.RegistroDuplicadoErro("Já existe uma disciplina registrada com este nome."));
 
         try
         {
@@ -57,7 +58,7 @@ public class DisciplinaAppService
                 disciplina
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar cadastrar o registro.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -66,7 +67,7 @@ public class DisciplinaAppService
         var registros = repositorioDisciplina.SelecionarRegistros();
 
         if (registros.Any(i => !i.Id.Equals(id) && i.Nome.Equals(disciplinaEditada.Nome)))
-            return Result.Fail("Já existe uma disciplina registrada com este nome.");
+            return Result.Fail(ResultadosErro.RegistroDuplicadoErro("Já existe uma disciplina registrada com este nome."));
 
         try
         {
@@ -86,7 +87,7 @@ public class DisciplinaAppService
                 disciplinaEditada
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar editar o registro.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -99,7 +100,7 @@ public class DisciplinaAppService
             if (materias.Any(m => m.Disciplina.Id.Equals(id)))
             {
                 var erro = ResultadosErro
-                    .RegistroDuplicadoErro("A disciplina não pôde ser excluída pois está em uma ou mais matérias ativas.");
+                    .ExclusaoBloqueadaErro("A disciplina não pôde ser excluída pois está em uma ou mais matérias ativas.");
 
                 return Result.Fail(erro);
             }
@@ -109,7 +110,7 @@ public class DisciplinaAppService
             if (testes.Any(t => t.Disciplina.Id.Equals(id)))
             {
                 var erro = ResultadosErro
-                    .RegistroDuplicadoErro("A disciplina não pôde ser excluída pois está em um ou mais testes ativos.");
+                    .ExclusaoBloqueadaErro("A disciplina não pôde ser excluída pois está em um ou mais testes ativos.");
 
                 return Result.Fail(erro);
             }
@@ -142,7 +143,7 @@ public class DisciplinaAppService
             var registroSelecionado = repositorioDisciplina.SelecionarRegistroPorId(id);
 
             if (registroSelecionado is null)
-                return Result.Fail("Não foi possível obter o registro.");
+                return Result.Fail(ResultadosErro.RegistroNaoEncontradoErro(id));
 
             return Result.Ok(registroSelecionado);
         }
@@ -154,7 +155,7 @@ public class DisciplinaAppService
                 id
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter o registro.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -173,7 +174,7 @@ public class DisciplinaAppService
                 "Ocorreu um erro durante a seleção de registros."
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter o registros.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 }

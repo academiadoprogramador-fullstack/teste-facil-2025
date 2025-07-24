@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FluentResults;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Text.Json;
 using TesteFacil.Aplicacao.ModuloDisciplina;
+using TesteFacil.Dominio.ModuloDisciplina;
+using TesteFacil.WebApp.Extensions;
 using TesteFacil.WebApp.Models;
 
 namespace TesteFacil.WebApp.Controllers;
@@ -21,7 +25,20 @@ public class DisciplinaController : Controller
         var resultado = disciplinaAppService.SelecionarTodos();
 
         if (resultado.IsFailed)
-            return RedirectToAction("Home/Index");
+        {
+            foreach (var erro in resultado.Errors)
+            {
+                var notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
+            return RedirectToAction("erro", "home");
+        }
 
         var registros = resultado.Value;
 
@@ -57,7 +74,14 @@ public class DisciplinaController : Controller
 
         if (resultado.IsFailed)
         {
-            ModelState.AddModelError("CadastroUnico", resultado.Errors[0].Message);
+            foreach (var erro in resultado.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
+                {
+                    ModelState.AddModelError("CadastroUnico", erro.Reasons[0].Message);
+                    break;
+                }
+            }
 
             return View(cadastrarVM);
         }
@@ -66,12 +90,25 @@ public class DisciplinaController : Controller
     }
 
     [HttpGet("editar/{id:guid}")]
-    public ActionResult Editar(Guid id)
+    public IActionResult Editar(Guid id)
     {
         var resultado = disciplinaAppService.SelecionarPorId(id);
 
         if (resultado.IsFailed)
+        {
+            foreach (var erro in resultado.Errors)
+            {
+                var notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
         var registroSelecionado = resultado.Value;
 
@@ -85,7 +122,7 @@ public class DisciplinaController : Controller
 
     [HttpPost("editar/{id:guid}")]
     [ValidateAntiForgeryToken]
-    public ActionResult Editar(Guid id, EditarDisciplinaViewModel editarVM)
+    public IActionResult Editar(Guid id, EditarDisciplinaViewModel editarVM)
     {
         var entidadeEditada = FormularioDisciplinaViewModel.ParaEntidade(editarVM);
 
@@ -93,7 +130,14 @@ public class DisciplinaController : Controller
 
         if (resultado.IsFailed)
         {
-            ModelState.AddModelError("CadastroUnico", resultado.Errors[0].Message);
+            foreach (var erro in resultado.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
+                {
+                    ModelState.AddModelError("CadastroUnico", erro.Reasons[0].Message);
+                    break;
+                }
+            }
 
             return View(editarVM);
         }
@@ -107,7 +151,20 @@ public class DisciplinaController : Controller
         var resultado = disciplinaAppService.SelecionarPorId(id);
 
         if (resultado.IsFailed)
+        {
+            foreach (var erro in resultado.Errors)
+            {
+                var notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
             return RedirectToAction(nameof(Index));
+        }
 
         var registroSelecionado = resultado.Value;
 
@@ -129,21 +186,13 @@ public class DisciplinaController : Controller
         {
             foreach (var erro in resultado.Errors)
             {
-                if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
-                {
-                    var notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
-                        erro.Message,
-                        erro.Reasons[0].Message
-                    );
+                var notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
 
-                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
-
-                    break;
-                }
-                else
-                {
-                    return RedirectToAction("Home/Erro");
-                }
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
             }
         }
 
@@ -154,9 +203,20 @@ public class DisciplinaController : Controller
     public IActionResult Detalhes(Guid id)
     {
         var resultado = disciplinaAppService.SelecionarPorId(id);
-        
+
         if (resultado.IsFailed)
-            return RedirectToAction(nameof(Index));
+        {
+            foreach (var erro in resultado.Errors)
+            {
+                var notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+        }
 
         var detalhesVm = DetalhesDisciplinaViewModel.ParaDetalhesVm(resultado.Value);
 

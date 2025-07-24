@@ -1,5 +1,6 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
+using TesteFacil.Aplicacao.Compartilhado;
 using TesteFacil.Dominio.Compartilhado;
 using TesteFacil.Dominio.ModuloDisciplina;
 using TesteFacil.Dominio.ModuloMateria;
@@ -42,7 +43,7 @@ public class MateriaAppService
         var registros = repositorioMateria.SelecionarRegistros();
 
         if (registros.Any(i => i.Nome.Equals(materia.Nome)))
-            return Result.Fail("Já existe uma matéria registrada com este nome.");
+            return Result.Fail(ResultadosErro.RegistroDuplicadoErro("Já existe uma matéria registrada com este nome."));
 
         try
         {
@@ -62,7 +63,7 @@ public class MateriaAppService
                 materia
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar cadastrar a entidade.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -71,7 +72,7 @@ public class MateriaAppService
         var registros = repositorioMateria.SelecionarRegistros();
 
         if (registros.Any(i => !i.Id.Equals(id) && i.Nome.Equals(materiaEditada.Nome)))
-            return Result.Fail("Já existe uma matéria registrada com este nome.");
+            return Result.Fail(ResultadosErro.RegistroDuplicadoErro("Já existe uma matéria registrada com este nome."));
 
         try
         {
@@ -91,7 +92,7 @@ public class MateriaAppService
                 materiaEditada
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar editar o registro.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -102,12 +103,22 @@ public class MateriaAppService
             var questoes = repositorioQuestao.SelecionarRegistros();
 
             if (questoes.Any(m => m.Materia.Id.Equals(id)))
-                return Result.Fail("A matéria não pôde ser excluída pois está em uma ou mais questões ativas.");
+            {
+                var erro = ResultadosErro
+                    .ExclusaoBloqueadaErro("A matéria não pôde ser excluída pois está em uma ou mais questões ativas.");
+
+                return Result.Fail(erro);
+            }
 
             var testes = repositorioTeste.SelecionarRegistros();
 
             if (testes.Any(t => t.Materia?.Id == id))
-                return Result.Fail("A matéria não pôde ser excluída pois está em um ou mais testes ativos.");
+            {
+                var erro = ResultadosErro
+                    .ExclusaoBloqueadaErro("A matéria não pôde ser excluída pois está em um ou mais testes ativo.");
+
+                return Result.Fail(erro);
+            }
 
             repositorioDisciplina.Excluir(id);
 
@@ -126,7 +137,7 @@ public class MateriaAppService
                 id
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar excluir o registro.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -137,7 +148,7 @@ public class MateriaAppService
             var registroSelecionado = repositorioMateria.SelecionarRegistroPorId(id);
 
             if (registroSelecionado is null)
-                return Result.Fail("Não foi possível obter o registro.");
+                return Result.Fail(ResultadosErro.RegistroNaoEncontradoErro(id));
 
             return Result.Ok(registroSelecionado);
         }
@@ -149,7 +160,7 @@ public class MateriaAppService
                 id
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter o registro.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 
@@ -157,6 +168,7 @@ public class MateriaAppService
     {
         try
         {
+            throw new NotImplementedException();
             var registros = repositorioMateria.SelecionarRegistros();
 
             return Result.Ok(registros);
@@ -168,7 +180,7 @@ public class MateriaAppService
                 "Ocorreu um erro durante a seleção de registros."
             );
 
-            return Result.Fail("Ocorreu um erro inesperado ao tentar obter o registros.");
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
     }
 }

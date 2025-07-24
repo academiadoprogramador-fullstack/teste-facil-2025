@@ -11,6 +11,21 @@ public abstract class ResultadosErro
             .WithMetadata("TipoErro", "RegistroDuplicado");
     }
 
+    public static Error RegistroNaoEncontradoErro(Guid id)
+    {
+        return new Error("Registro não encontrado")
+            .CausedBy("Não foi possível obter o registro com o ID: " + id)
+            .WithMetadata("TipoErro", "RegistroNaoEncontrado");
+    }
+
+    public static Error ExclusaoBloqueadaErro(string mensagemErro)
+    {
+        return new Error("Exclusão bloqueada")
+            .CausedBy(mensagemErro)
+            .WithMetadata("TipoErro", "ExclusaoBloqueada");
+    }
+
+
     public static Error ExcecaoInternaErro(Exception ex)
     {
         return new Error("Ocorreu um erro interno do servidor")
