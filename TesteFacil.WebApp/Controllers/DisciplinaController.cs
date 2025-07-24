@@ -127,12 +127,24 @@ public class DisciplinaController : Controller
 
         if (resultado.IsFailed)
         {
-            var notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
-                "Erro ao excluir registro",
-                resultado.Errors[0].Message
-            );
+            foreach (var erro in resultado.Errors)
+            {
+                if (erro.Metadata["TipoErro"].ToString() == "RegistroDuplicado")
+                {
+                    var notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                        erro.Message,
+                        erro.Reasons[0].Message
+                    );
 
-            TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                    TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+
+                    break;
+                }
+                else
+                {
+                    return RedirectToAction("Home/Erro");
+                }
+            }
         }
 
         return RedirectToAction(nameof(Index));
