@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 using TesteFacil.Aplicacao.ModuloDisciplina;
 using TesteFacil.WebApp.Models;
 
@@ -25,6 +26,15 @@ public class DisciplinaController : Controller
         var registros = resultado.Value;
 
         var visualizarVM = new VisualizarDisciplinasViewModel(registros);
+
+        var existeNotificacao = TempData.TryGetValue(nameof(NotificacaoViewModel), out var valor);
+
+        if (existeNotificacao && valor is string jsonString)
+        {
+            var notificacaoVm = JsonSerializer.Deserialize<NotificacaoViewModel>(jsonString);
+
+            ViewData.Add(nameof(NotificacaoViewModel), notificacaoVm);
+        }
 
         return View(visualizarVM);
     }
@@ -113,7 +123,17 @@ public class DisciplinaController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult ExcluirConfirmado(Guid id)
     {
-        disciplinaAppService.Excluir(id);
+        var resultado = disciplinaAppService.Excluir(id);
+
+        if (resultado.IsFailed)
+        {
+            var notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                "Erro ao excluir registro",
+                resultado.Errors[0].Message
+            );
+
+            TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+        }
 
         return RedirectToAction(nameof(Index));
     }
