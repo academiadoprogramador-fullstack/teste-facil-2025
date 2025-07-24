@@ -44,9 +44,10 @@ public class Program
 
             app.UseDeveloperExceptionPage();
         }
-
-        if (app.Environment.IsProduction())
+        else
+        {
             app.UseExceptionHandler("/erro");
+        }
 
         app.UseAntiforgery();
         app.UseStaticFiles();

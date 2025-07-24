@@ -23,12 +23,15 @@ public class Disciplina : EntidadeBase<Disciplina>
         Nome = nome;
     }
 
-    public List<Questao> ObterQuestoesAleatorias(int quantidadeQuestoes)
+    public List<Questao> ObterQuestoesAleatorias(int quantidadeQuestoes, SerieMateria serie)
     {
         var questoesRelacionadas = new List<Questao>();
 
         foreach (var mat in Materias)
-            questoesRelacionadas.AddRange(mat.Questoes);
+        {
+            if (mat.Serie.Equals(serie))
+                questoesRelacionadas.AddRange(mat.Questoes);
+        }
 
         var random = new Random();
 
