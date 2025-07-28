@@ -238,7 +238,7 @@ public class TesteController : Controller
         var resultado = testeAppService.GerarPdf(id);
 
         if (resultado.IsFailed)
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(Index));        
 
         return File(resultado.Value, "application/pdf");
     }

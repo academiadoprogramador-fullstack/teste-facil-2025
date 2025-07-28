@@ -7,7 +7,6 @@ using TesteFacil.Dominio.ModuloDisciplina;
 using TesteFacil.Dominio.ModuloMateria;
 using TesteFacil.Dominio.ModuloQuestao;
 using TesteFacil.Dominio.ModuloTeste;
-using TesteFacil.Infraestrutura.Pdf;
 
 namespace TesteFacil.Aplicacao.ModuloTeste;
 
@@ -17,6 +16,7 @@ public class TesteAppService
     private readonly IRepositorioQuestao repositorioQuestao;
     private readonly IRepositorioDisciplina repositorioDisciplina;
     private readonly IRepositorioMateria repositorioMateria;
+    private readonly IGeradorTeste geradorTeste;
     private readonly IUnitOfWork unitOfWork;
     private readonly ILogger<TesteAppService> logger;
 
@@ -25,6 +25,7 @@ public class TesteAppService
         IRepositorioQuestao repositorioQuestao,
         IRepositorioDisciplina repositorioDisciplina,
         IRepositorioMateria repositorioMateria,
+        IGeradorTeste geradorTeste,
         IUnitOfWork unitOfWork,
         ILogger<TesteAppService> logger
     )
@@ -33,6 +34,7 @@ public class TesteAppService
         this.repositorioQuestao = repositorioQuestao;
         this.repositorioDisciplina = repositorioDisciplina;
         this.repositorioMateria = repositorioMateria;
+        this.geradorTeste = geradorTeste;
         this.unitOfWork = unitOfWork;
         this.logger = logger;
     }
@@ -40,7 +42,7 @@ public class TesteAppService
     public Result Cadastrar(Teste teste)
     {
         try
-        {
+        {            
             repositorioTeste.Cadastrar(teste);
 
             unitOfWork.Commit();
@@ -105,14 +107,26 @@ public class TesteAppService
 
     public Result<byte[]> GerarPdf(Guid id, bool gabarito = false)
     {
-        var registroSelecionado = repositorioTeste.SelecionarRegistroPorId(id);
+        Teste registroSelecionado = repositorioTeste.SelecionarRegistroPorId(id);
 
         if (registroSelecionado is null)
             return Result.Fail(ResultadosErro.RegistroNaoEncontradoErro(id));
 
-        var documento = new ImpressaoTesteDocument(registroSelecionado, gabarito);
+        byte[] pdfBytes = null;
 
-        var pdfBytes = documento.GeneratePdf();
+        try
+        {
+            pdfBytes = geradorTeste.GerarNovoTeste(registroSelecionado, gabarito);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Ocorreu um erro durante a geração do PDF."
+            );
+
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
+        }
 
         return pdfBytes;
     }

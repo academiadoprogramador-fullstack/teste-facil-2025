@@ -6,12 +6,12 @@ using TesteFacil.Dominio.ModuloTeste;
 
 namespace TesteFacil.Infraestrutura.Pdf;
 
-public class ImpressaoTesteDocument : IDocument
+public class TesteDocument : IDocument
 {
     public Teste Model { get; }
     public bool Gabarito { get; }
 
-    public ImpressaoTesteDocument(Teste model, bool gabarito = false)
+    public TesteDocument(Teste model, bool gabarito = false)
     {
         QuestPDF.Settings.License = LicenseType.Community;
 
