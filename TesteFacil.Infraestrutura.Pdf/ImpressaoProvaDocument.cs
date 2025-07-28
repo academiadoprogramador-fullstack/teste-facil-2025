@@ -26,7 +26,6 @@ public class ImpressaoTesteDocument : IDocument
             {
                 page.Header().Height(50).Background("#0D6EFD").Element(ComposeHeader);
                 page.Content().Background(Colors.Grey.Lighten3).Element(ComposeContent);
-                //page.Footer().Height(50).Background(Colors.Grey.Lighten1);
             });
     }
 
@@ -126,7 +125,6 @@ public class ImpressaoTesteDocument : IDocument
                         }
                     });
                 }
-
             }
         });
     }
