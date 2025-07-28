@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using QuestPDF.Fluent;
 using System.Text.Json;
 using TesteFacil.Dominio.Compartilhado;
 using TesteFacil.Dominio.ModuloDisciplina;
 using TesteFacil.Dominio.ModuloMateria;
 using TesteFacil.Dominio.ModuloQuestao;
 using TesteFacil.Dominio.ModuloTeste;
+using TesteFacil.Infraestrutura.Pdf;
 using TesteFacil.WebApp.Models;
 
 namespace TesteFacil.WebApp.Controllers;
@@ -204,5 +206,36 @@ public class TesteController : Controller
         var detalhesVM = DetalhesTesteViewModel.ParaDetalhesVm(registroSelecionado);
 
         return View(detalhesVM);
+    }
+
+
+    [HttpGet("gerar-pdf/{id:guid}")]
+    public IActionResult GerarPdf(Guid id)
+    {
+        var registroSelecionado = repositorioTeste.SelecionarRegistroPorId(id);
+
+        if (registroSelecionado is null)
+            return RedirectToAction(nameof(Index));
+
+        var documento = new ImpressaoTesteDocument(registroSelecionado);
+
+        var pdfBytes = documento.GeneratePdf();
+
+        return File(pdfBytes, "application/pdf");
+    }
+
+    [HttpGet("gerar-pdf/gabarito/{id:guid}")]
+    public IActionResult GerarPdfGabarito(Guid id)
+    {
+        var registroSelecionado = repositorioTeste.SelecionarRegistroPorId(id);
+
+        if (registroSelecionado is null)
+            return RedirectToAction(nameof(Index));
+
+        var documento = new ImpressaoTesteDocument(registroSelecionado, true);
+
+        var pdfBytes = documento.GeneratePdf();
+
+        return File(pdfBytes, "application/pdf");
     }
 }

@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TesteFacil.Aplicacao\TesteFacil.Aplicacao.csproj" />
     <ProjectReference Include="..\TesteFacil.Infraestrutura.Orm\TesteFacil.Infraestrutura.Orm.csproj" />
+    <ProjectReference Include="..\TesteFacil.Infraestrutura.Pdf\TesteFacil.Infraestrutura.Pdf.csproj" />
   </ItemGroup>
 
 </Project>
