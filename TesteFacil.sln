@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TesteFacil.Aplicacao", "Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TesteFacil.Infraestrutura.Pdf", "TesteFacil.Infraestrutura.Pdf\TesteFacil.Infraestrutura.Pdf.csproj", "{D8E22A94-3AEC-4849-9746-4675D8DEC86B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TesteFacil.Infrastructure.AI.Gemini", "TesteFacil.Infrastructure.AI.Gemini\TesteFacil.Infrastructure.AI.Gemini.csproj", "{1DC3FAED-E976-41AB-8FE3-DD77B7243D07}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{D8E22A94-3AEC-4849-9746-4675D8DEC86B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8E22A94-3AEC-4849-9746-4675D8DEC86B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8E22A94-3AEC-4849-9746-4675D8DEC86B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DC3FAED-E976-41AB-8FE3-DD77B7243D07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DC3FAED-E976-41AB-8FE3-DD77B7243D07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DC3FAED-E976-41AB-8FE3-DD77B7243D07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DC3FAED-E976-41AB-8FE3-DD77B7243D07}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -55,6 +61,7 @@ Global
 		{37E8DF0E-D411-4020-A258-9FF2AA50824B} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{06CE0BA0-7445-473F-870C-699DF017B10D} = {3BFC3172-6255-4F3B-A15A-A1B612E20C48}
 		{D8E22A94-3AEC-4849-9746-4675D8DEC86B} = {CA8239D5-AD2A-40B0-ABAF-798AEE62714F}
+		{1DC3FAED-E976-41AB-8FE3-DD77B7243D07} = {CA8239D5-AD2A-40B0-ABAF-798AEE62714F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {804F73CF-B6E5-48DD-BA11-4FC1CC629D29}

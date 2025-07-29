@@ -25,6 +25,7 @@
     <ProjectReference Include="..\TesteFacil.Aplicacao\TesteFacil.Aplicacao.csproj" />
     <ProjectReference Include="..\TesteFacil.Infraestrutura.Orm\TesteFacil.Infraestrutura.Orm.csproj" />
     <ProjectReference Include="..\TesteFacil.Infraestrutura.Pdf\TesteFacil.Infraestrutura.Pdf.csproj" />
+    <ProjectReference Include="..\TesteFacil.Infrastructure.AI.Gemini\TesteFacil.Infrastructure.AI.Gemini.csproj" />
   </ItemGroup>
 
 </Project>

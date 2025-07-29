@@ -12,21 +12,21 @@ public class QuestaoAppService
 {
     private readonly IRepositorioQuestao repositorioQuestao;
     private readonly IRepositorioTeste repositorioTeste;
-    private readonly IRepositorioMateria repositorioMateria;
+    private readonly IGeradorQuestoes geradorQuestoes;
     private readonly IUnitOfWork unitOfWork;
     private readonly ILogger<QuestaoAppService> logger;
 
     public QuestaoAppService(
         IRepositorioQuestao repositorioQuestao,
         IRepositorioTeste repositorioTeste,
-        IRepositorioMateria repositorioMateria,
+        IGeradorQuestoes geradorQuestoes,
         IUnitOfWork unitOfWork,
         ILogger<QuestaoAppService> logger
-    )
+)
     {
         this.repositorioQuestao = repositorioQuestao;
         this.repositorioTeste = repositorioTeste;
-        this.repositorioMateria = repositorioMateria;
+        this.geradorQuestoes = geradorQuestoes;
         this.unitOfWork = unitOfWork;
         this.logger = logger;
     }
@@ -230,19 +230,23 @@ public class QuestaoAppService
         }
     }
 
-    public Result ValidarAlternativaQuestao(Guid questaoId, string respostaAlternativa, bool alternativaCorreta)
+    public async Task<Result<List<Questao>>> GerarQuestoesDaMateria(Materia materiaSelecionada, int quantidadeQuestoes)
     {
-        var registroSelecionado = repositorioQuestao.SelecionarRegistroPorId(questaoId);
+        try
+        {
+            List<Questao> questoes = await geradorQuestoes.GerarQuestoesAsync(materiaSelecionada, quantidadeQuestoes);
 
-        if (registroSelecionado is null)
-            return Result.Fail(ResultadosErro.RegistroNaoEncontradoErro(questaoId));
+            return Result.Ok(questoes);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(
+                ex,
+                "Ocorreu um erro durante a geração de questões da matéria {@Registro}.",
+                materiaSelecionada
+            );
 
-        if (registroSelecionado.Alternativas.Any(a => a.Resposta.Equals(respostaAlternativa)))
-            return Result.Fail(ResultadosErro.RegistroDuplicadoErro("Já existe uma alternativa registrada com esta resposta."));
-
-        if (alternativaCorreta && registroSelecionado.Alternativas.Any(a => a.Correta))
-            return Result.Fail(ResultadosErro.RegistroDuplicadoErro("Já existe uma alternativa registrada como correta."));
-
-        return Result.Ok();
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
+        }
     }
 }
