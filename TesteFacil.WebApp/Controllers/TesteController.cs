@@ -109,10 +109,7 @@ public class TesteController : Controller
 
         var materias = materiaAppService
             .SelecionarTodos()
-            .ValueOrDefault
-            .Where(m => m.Disciplina.Equals(disciplinaSelecionada))
-            .Where(m => m.Serie.Equals(primeiraEtapaVm.Serie))
-            .ToList();
+            .ValueOrDefault;
 
         var segundaEtapaVm = PrimeiraEtapaGerarTesteViewModel.AvancarEtapa(
             primeiraEtapaVm,

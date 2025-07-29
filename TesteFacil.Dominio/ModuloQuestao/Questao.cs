@@ -9,6 +9,7 @@ public class Questao : EntidadeBase<Questao>
     public string Enunciado { get; set; }
     public bool UtilizadaEmTeste { get; set; }
     public Materia Materia { get; set; }
+    public Guid MateriaId { get; set; }
     public List<Alternativa> Alternativas { get; set; }
     public List<Teste> Testes { get; set; }
     public Alternativa? AlternativaCorreta => Alternativas.Find(a => a.Correta);
