@@ -1,11 +1,7 @@
 ﻿using FluentResults;
 using Microsoft.Extensions.Logging;
-using QuestPDF.Fluent;
 using TesteFacil.Aplicacao.Compartilhado;
 using TesteFacil.Dominio.Compartilhado;
-using TesteFacil.Dominio.ModuloDisciplina;
-using TesteFacil.Dominio.ModuloMateria;
-using TesteFacil.Dominio.ModuloQuestao;
 using TesteFacil.Dominio.ModuloTeste;
 
 namespace TesteFacil.Aplicacao.ModuloTeste;
@@ -13,27 +9,18 @@ namespace TesteFacil.Aplicacao.ModuloTeste;
 public class TesteAppService
 {
     private readonly IRepositorioTeste repositorioTeste;
-    private readonly IRepositorioQuestao repositorioQuestao;
-    private readonly IRepositorioDisciplina repositorioDisciplina;
-    private readonly IRepositorioMateria repositorioMateria;
     private readonly IGeradorTeste geradorTeste;
     private readonly IUnitOfWork unitOfWork;
     private readonly ILogger<TesteAppService> logger;
 
     public TesteAppService(
         IRepositorioTeste repositorioTeste,
-        IRepositorioQuestao repositorioQuestao,
-        IRepositorioDisciplina repositorioDisciplina,
-        IRepositorioMateria repositorioMateria,
         IGeradorTeste geradorTeste,
         IUnitOfWork unitOfWork,
         ILogger<TesteAppService> logger
     )
     {
         this.repositorioTeste = repositorioTeste;
-        this.repositorioQuestao = repositorioQuestao;
-        this.repositorioDisciplina = repositorioDisciplina;
-        this.repositorioMateria = repositorioMateria;
         this.geradorTeste = geradorTeste;
         this.unitOfWork = unitOfWork;
         this.logger = logger;
@@ -137,7 +124,7 @@ public class TesteAppService
 
     public Result<byte[]> GerarPdf(Guid id, bool gabarito = false)
     {
-        Teste registroSelecionado = repositorioTeste.SelecionarRegistroPorId(id);
+        var registroSelecionado = repositorioTeste.SelecionarRegistroPorId(id);
 
         if (registroSelecionado is null)
             return Result.Fail(ResultadosErro.RegistroNaoEncontradoErro(id));
