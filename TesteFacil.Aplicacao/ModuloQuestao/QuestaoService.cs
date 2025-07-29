@@ -22,7 +22,7 @@ public class QuestaoAppService
         IGeradorQuestoes geradorQuestoes,
         IUnitOfWork unitOfWork,
         ILogger<QuestaoAppService> logger
-)
+    )
     {
         this.repositorioQuestao = repositorioQuestao;
         this.repositorioTeste = repositorioTeste;
