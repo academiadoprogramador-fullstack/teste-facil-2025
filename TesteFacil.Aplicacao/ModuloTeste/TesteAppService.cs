@@ -63,6 +63,31 @@ public class TesteAppService
         }
     }
 
+    public Result Excluir(Guid id)
+    {
+        try
+        {
+            repositorioTeste.Excluir(id);
+
+            unitOfWork.Commit();
+
+            return Result.Ok();
+
+        }
+        catch (Exception ex)
+        {
+            unitOfWork.Rollback();
+
+            logger.LogError(
+                ex,
+                "Ocorreu um erro durante a exclusão do registro {Id}.",
+                id
+            );
+
+            return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
+        }
+    }
+
     public Result<Teste> SelecionarPorId(Guid id)
     {
         try
@@ -103,6 +128,11 @@ public class TesteAppService
 
             return Result.Fail(ResultadosErro.ExcecaoInternaErro(ex));
         }
+    }
+
+    public Result CadastrarTesteDuplicado(Teste teste)
+    {
+        return Cadastrar(teste);
     }
 
     public Result<byte[]> GerarPdf(Guid id, bool gabarito = false)

@@ -5,7 +5,7 @@ using TesteFacil.Aplicacao.ModuloDisciplina;
 using TesteFacil.Aplicacao.ModuloMateria;
 using TesteFacil.Aplicacao.ModuloQuestao;
 using TesteFacil.Aplicacao.ModuloTeste;
-
+using TesteFacil.Dominio.Extensions;
 using TesteFacil.WebApp.Models;
 
 namespace TesteFacil.WebApp.Controllers;
@@ -206,6 +206,60 @@ public class TesteController : Controller
         return RedirectToAction(nameof(Index));
     }
 
+    [HttpGet("excluir/{id:guid}")]
+    public IActionResult Excluir(Guid id)
+    {
+        var resultado = testeAppService.SelecionarPorId(id);
+
+        if (resultado.IsFailed)
+        {
+            foreach (var erro in resultado.Errors)
+            {
+                var notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        var registro = resultado.Value;
+
+        var excluirVM = new ExcluirTesteViewModel(
+            registro.Id,
+            registro.Titulo
+        );
+
+        return View(excluirVM);
+    }
+
+    [HttpPost("excluir/{id:guid}")]
+    [ValidateAntiForgeryToken]
+    public IActionResult ExcluirConfirmado(Guid id)
+    {
+        var resultado = testeAppService.Excluir(id);
+
+        if (resultado.IsFailed)
+        {
+            foreach (var erro in resultado.Errors)
+            {
+                var notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+        }
+
+        return RedirectToAction(nameof(Index));
+    }
+
     [HttpGet("detalhes/{id:guid}")]
     public IActionResult Detalhes(Guid id)
     {
@@ -230,6 +284,125 @@ public class TesteController : Controller
         var detalhesVm = DetalhesTesteViewModel.ParaDetalhesVm(resultado.Value);
 
         return View(detalhesVm);
+    }
+
+    [HttpGet("duplicar/{id:guid}")]
+    public IActionResult Duplicar(Guid id)
+    {
+        var resultado = testeAppService.SelecionarPorId(id);
+
+        if (resultado.IsFailed)
+        {
+            foreach (var erro in resultado.Errors)
+            {
+                var notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        var registro = resultado.Value;
+
+        var disciplinas = disciplinaAppService.SelecionarTodos().ValueOrDefault;
+        var questoes = questaoAppService.SelecionarTodos().ValueOrDefault;
+
+        var materiasFiltradas = materiaAppService
+            .SelecionarTodos()
+            .ValueOrDefault
+            .Where(m => m.Disciplina.Equals(registro.Disciplina))
+            .Where(m => m.Serie.Equals(registro.Serie))
+            .ToList();
+
+        var duplicarVm = new DuplicarTesteViewModel
+        {
+            TesteId = registro.Id,
+            Titulo = string.Empty,
+
+            DisciplinaId = registro.Disciplina.Id,
+            Disciplina = registro.Disciplina.Nome,
+
+            Serie = registro.Serie,
+            NomeSerie = registro.Serie.GetDisplayName() ?? registro.Serie.ToString(),
+            QuantidadeQuestoes = registro.QuantidadeQuestoes,
+            Recuperacao = registro.Recuperacao,
+
+            MateriasDisponiveis = materiasFiltradas
+                .Select(m => new SelectListItem(m.Nome, m.Id.ToString()))
+                .ToList()
+        };
+
+        return View(duplicarVm);
+    }
+
+    [HttpPost("duplicar/{id:guid}/sortear-questoes")]
+    public IActionResult SortearQuestoesDuplicar(DuplicarTesteViewModel duplicarVm)
+    {
+        var disciplinas = disciplinaAppService.SelecionarTodos().ValueOrDefault;
+        var materias = materiaAppService.SelecionarTodos().ValueOrDefault;
+        var questoes = questaoAppService.SelecionarTodos().ValueOrDefault;
+
+        var entidade = DuplicarTesteViewModel.ParaEntidade(
+            duplicarVm,
+            disciplinas,
+            materias,
+            questoes
+        );
+
+        var questoesSorteadas = entidade.SortearQuestoes();
+
+        if (questoesSorteadas is null)
+            return RedirectToAction(nameof(Index));
+
+        duplicarVm.QuestoesSorteadas = questoesSorteadas
+            .Select(DetalhesQuestaoViewModel.ParaDetalhesVm)
+            .ToList();
+
+        duplicarVm.MateriasDisponiveis = materias
+            .Where(m => m.Disciplina.Id.Equals(duplicarVm.DisciplinaId))
+            .Where(m => m.Serie.Equals(duplicarVm.Serie))
+            .Select(m => new SelectListItem(m.Nome, m.Id.ToString()))
+            .ToList();
+
+        return View(nameof(Duplicar), duplicarVm);
+    }
+
+    [HttpPost("duplicar/{id:guid}/confirmar")]
+    public IActionResult ConfirmarDuplicacao(DuplicarTesteViewModel segundaEtapaVm)
+    {
+        var disciplinas = disciplinaAppService.SelecionarTodos().ValueOrDefault;
+        var materias = materiaAppService.SelecionarTodos().ValueOrDefault;
+        var questoes = questaoAppService.SelecionarTodos().ValueOrDefault;
+
+        var entidade = DuplicarTesteViewModel.ParaEntidade(
+            segundaEtapaVm,
+            disciplinas,
+            materias,
+            questoes
+        );
+
+        var resultado = testeAppService.CadastrarTesteDuplicado(entidade);
+
+        if (resultado.IsFailed)
+        {
+            foreach (var erro in resultado.Errors)
+            {
+                var notificacaoJson = NotificacaoViewModel.GerarNotificacaoSerializada(
+                    erro.Message,
+                    erro.Reasons[0].Message
+                );
+
+                TempData.Add(nameof(NotificacaoViewModel), notificacaoJson);
+                break;
+            }
+        }
+
+        return RedirectToAction(nameof(Index));
     }
 
     [HttpGet("gerar-pdf/{id:guid}")]

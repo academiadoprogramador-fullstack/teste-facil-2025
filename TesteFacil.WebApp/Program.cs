@@ -25,6 +25,7 @@ public class Program
 
         if (builder.Environment.IsDevelopment())
         {
+            builder.Services.AddScoped<TesteAppService>();
             builder.Services.AddScoped<DisciplinaAppService>();
             builder.Services.AddScoped<MateriaAppService>();
             builder.Services.AddScoped<QuestaoAppService>();
