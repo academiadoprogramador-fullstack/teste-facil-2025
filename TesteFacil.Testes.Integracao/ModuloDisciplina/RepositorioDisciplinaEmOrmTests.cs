@@ -1,4 +1,5 @@
-﻿using TesteFacil.Dominio.ModuloDisciplina;
+﻿using FizzWare.NBuilder;
+using TesteFacil.Dominio.ModuloDisciplina;
 using TesteFacil.Infraestrutura.Orm.Compartilhado;
 using TesteFacil.Infraestrutura.Orm.ModuloDisciplina;
 using TesteFacil.Testes.Integracao.Compartilhado;
@@ -18,16 +19,18 @@ public sealed class RepositorioDisciplinaEmOrmTests
         dbContext = TesteDbContextFactory.CriarDbContext();
        
         repositorioDisciplina = new RepositorioDisciplinaEmOrm(dbContext);
+
+        BuilderSetup.SetCreatePersistenceMethod<Disciplina>(repositorioDisciplina.Cadastrar);
+        BuilderSetup.SetCreatePersistenceMethod<IList<Disciplina>>(repositorioDisciplina.CadastrarTodos);
     }
 
     [TestMethod]
     public void Deve_Cadastrar_Disciplina_Corretamente()
     {
         // Arrange
-        var disciplina = new Disciplina("Matemática");
+        var disciplina = Builder<Disciplina>.CreateNew().Persist();
 
         // Act
-        repositorioDisciplina.Cadastrar(disciplina);
         dbContext.SaveChanges();
 
         // Assert
@@ -40,11 +43,11 @@ public sealed class RepositorioDisciplinaEmOrmTests
     public void Deve_Editar_Disciplina_Corretamente()
     {
         // Arrange
-        var disciplina = new Disciplina("Matemática");
-        repositorioDisciplina.Cadastrar(disciplina);
+        var disciplina = Builder<Disciplina>.CreateNew().Persist();
+
         dbContext.SaveChanges();
 
-        var disciplinaEditada = new Disciplina("Física");
+        var disciplinaEditada = Builder<Disciplina>.CreateNew().Build();
 
         // Act
         var conseguiuEditar = repositorioDisciplina.Editar(disciplina.Id, disciplinaEditada);
@@ -61,8 +64,7 @@ public sealed class RepositorioDisciplinaEmOrmTests
     public void Deve_Excluir_Disciplina_Corretamente()
     {
         // Arrange
-        var disciplina = new Disciplina("Matemática");
-        repositorioDisciplina.Cadastrar(disciplina);
+        var disciplina = Builder<Disciplina>.CreateNew().Persist();
         dbContext.SaveChanges();
 
         // Act
@@ -80,17 +82,9 @@ public sealed class RepositorioDisciplinaEmOrmTests
     public void Deve_Selecionar_Disciplinas_Corretamente()
     {
         // Arrange - Arranjo
-        var disciplina = new Disciplina("Matemática");
-        var disciplina2 = new Disciplina("Ciências");
-        var disciplina3 = new Disciplina("Geografia");
-
-        repositorioDisciplina.Cadastrar(disciplina);
-        repositorioDisciplina.Cadastrar(disciplina2);
-        repositorioDisciplina.Cadastrar(disciplina3);
+        var disciplinasEsperadas = Builder<Disciplina>.CreateListOfSize(3).Persist().ToList();
 
         dbContext.SaveChanges();
-
-        List<Disciplina> disciplinasEsperadas = [disciplina, disciplina2, disciplina3];
 
         var disciplinasEsperadasOrdenadas = disciplinasEsperadas
             .OrderBy(d => d.Nome)

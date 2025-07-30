@@ -12,6 +12,11 @@ public class RepositorioBaseEmOrm<T> where T : EntidadeBase<T>
         this.registros = contexto.Set<T>();
     }
 
+    public void CadastrarTodos(IList<T> registros)
+    {
+        this.registros.AddRange(registros);
+    }
+
     public void Cadastrar(T novoRegistro)
     {
         registros.Add(novoRegistro);
