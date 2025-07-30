@@ -21,6 +21,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TesteFacil.Infraestrutura.P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TesteFacil.Infraestrutura.IA.Gemini", "TesteFacil.Infraestrutura.IA.Gemini\TesteFacil.Infraestrutura.IA.Gemini.csproj", "{11B339A3-AAF1-40A8-A1C3-F0EEFF19B21E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4. Testes", "4. Testes", "{FB83FBBE-7783-47D7-8502-775EB85CEE04}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TesteFacil.Testes.Integracao", "TesteFacil.Testes.Integracao\TesteFacil.Testes.Integracao.csproj", "{8AC59AB5-13EB-4699-8E05-7566E459FD5F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +55,10 @@ Global
 		{11B339A3-AAF1-40A8-A1C3-F0EEFF19B21E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11B339A3-AAF1-40A8-A1C3-F0EEFF19B21E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11B339A3-AAF1-40A8-A1C3-F0EEFF19B21E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8AC59AB5-13EB-4699-8E05-7566E459FD5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8AC59AB5-13EB-4699-8E05-7566E459FD5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8AC59AB5-13EB-4699-8E05-7566E459FD5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8AC59AB5-13EB-4699-8E05-7566E459FD5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +70,7 @@ Global
 		{06CE0BA0-7445-473F-870C-699DF017B10D} = {3BFC3172-6255-4F3B-A15A-A1B612E20C48}
 		{D8E22A94-3AEC-4849-9746-4675D8DEC86B} = {CA8239D5-AD2A-40B0-ABAF-798AEE62714F}
 		{11B339A3-AAF1-40A8-A1C3-F0EEFF19B21E} = {CA8239D5-AD2A-40B0-ABAF-798AEE62714F}
+		{8AC59AB5-13EB-4699-8E05-7566E459FD5F} = {FB83FBBE-7783-47D7-8502-775EB85CEE04}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {804F73CF-B6E5-48DD-BA11-4FC1CC629D29}
