@@ -1,35 +1,41 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DotNet.Testcontainers.Builders;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Testcontainers.MsSql;
 using TesteFacil.Infraestrutura.Orm.Compartilhado;
 
 namespace TesteFacil.Testes.Integracao.Compartilhado;
 
-public static class TesteDbContextFactory
+public class TesteDbContextFactory
 {
-    public static TesteFacilDbContext CriarDbContext()
-    {
-        var configuracao = CriarConfiguracao();
+    private readonly MsSqlContainer _container;
 
-        var connectionString = configuracao["SQL_CONNECTION_STRING"];
+    public TesteDbContextFactory()
+    {
+        _container = new MsSqlBuilder()
+            .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+            .WithCleanUp(true)
+            .Build();
+    }
+
+    public async Task<TesteFacilDbContext> CriarDbContextAsync()
+    {
+        await _container.StartAsync();
 
         var options = new DbContextOptionsBuilder<TesteFacilDbContext>()
-            .UseSqlServer(connectionString)
+            .UseSqlServer(_container.GetConnectionString())
             .Options;
 
         var dbContext = new TesteFacilDbContext(options);
 
-        dbContext.Database.EnsureDeleted();
-        dbContext.Database.EnsureCreated();
+        await dbContext.Database.EnsureCreatedAsync();
 
         return dbContext;
     }
 
-    private static IConfiguration CriarConfiguracao()
+    public async Task DisposeAsync()
     {
-        var assembly = typeof(TesteDbContextFactory).Assembly;
-
-        return new ConfigurationBuilder()
-            .AddUserSecrets(assembly)
-            .Build();
+        await _container.StopAsync();
+        await _container.DisposeAsync();
     }
 }

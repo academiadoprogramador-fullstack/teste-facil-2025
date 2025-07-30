@@ -10,18 +10,25 @@ namespace TesteFacil.Testes.Integracao.ModuloDisciplina;
 [TestCategory("Testes de Integração de Disciplina")]
 public sealed class RepositorioDisciplinaEmOrmTests
 {
+    private TesteDbContextFactory factory;
     private TesteFacilDbContext dbContext;
     private RepositorioDisciplinaEmOrm repositorioDisciplina;
 
     [TestInitialize]
-    public void ConfigurarTestes()
+    public async Task ConfigurarTestes()
     {
-        dbContext = TesteDbContextFactory.CriarDbContext();
-       
+        factory = new TesteDbContextFactory();
+        dbContext = await factory.CriarDbContextAsync();
         repositorioDisciplina = new RepositorioDisciplinaEmOrm(dbContext);
 
         BuilderSetup.SetCreatePersistenceMethod<Disciplina>(repositorioDisciplina.Cadastrar);
         BuilderSetup.SetCreatePersistenceMethod<IList<Disciplina>>(repositorioDisciplina.CadastrarTodos);
+    }
+
+    [TestCleanup]
+    public async Task LimparTestes()
+    {
+        await factory.DisposeAsync();
     }
 
     [TestMethod]
