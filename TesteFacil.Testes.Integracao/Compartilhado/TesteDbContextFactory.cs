@@ -1,6 +1,4 @@
-﻿using DotNet.Testcontainers.Builders;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
 using Testcontainers.MsSql;
 using TesteFacil.Infraestrutura.Orm.Compartilhado;
 
