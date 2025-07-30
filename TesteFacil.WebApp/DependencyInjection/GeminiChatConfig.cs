@@ -1,5 +1,5 @@
 ﻿using TesteFacil.Dominio.ModuloQuestao;
-using TesteFacil.Infrastructure.AI.Gemini;
+using TesteFacil.Infraestrutura.IA.Gemini;
 
 namespace TesteFacil.WebApp.DependencyInjection;
 

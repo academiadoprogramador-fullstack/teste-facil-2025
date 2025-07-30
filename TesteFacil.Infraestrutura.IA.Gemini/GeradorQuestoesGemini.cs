@@ -3,9 +3,9 @@ using System.Text;
 using TesteFacil.Dominio.ModuloQuestao;
 using Microsoft.Extensions.Configuration;
 using TesteFacil.Dominio.ModuloMateria;
-using TesteFacil.Infrastructure.AI.Gemini.DTOs;
+using TesteFacil.Infraestrutura.IA.Gemini.DTOs;
 
-namespace TesteFacil.Infrastructure.AI.Gemini;
+namespace TesteFacil.Infraestrutura.IA.Gemini;
 
 public class GeradorQuestoesGemini : IGeradorQuestoes
 {

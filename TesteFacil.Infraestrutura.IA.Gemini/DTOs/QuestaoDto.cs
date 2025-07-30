@@ -1,4 +1,4 @@
-﻿namespace TesteFacil.Infrastructure.AI.Gemini.DTOs;
+﻿namespace TesteFacil.Infraestrutura.IA.Gemini.DTOs;
 
 public class QuestaoDto
 {
