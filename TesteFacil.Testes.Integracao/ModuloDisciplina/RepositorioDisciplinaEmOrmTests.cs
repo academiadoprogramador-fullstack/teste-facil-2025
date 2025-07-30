@@ -23,7 +23,7 @@ public sealed class RepositorioDisciplinaEmOrmTests
     [TestMethod]
     public void Deve_Cadastrar_Registro_Corretamente()
     {
-        // Arrange (Configuração)
+        // Arrange (Arranjo)
         var entidade = new Disciplina("Ciências");
 
         // Act (Ação)
@@ -40,7 +40,7 @@ public sealed class RepositorioDisciplinaEmOrmTests
     [TestMethod]
     public void Deve_Editar_Registro_Corretamente()
     {
-        // Arrange (Configuração)
+        // Arrange (Arranjo)
         var entidade = new Disciplina("Ciências");
         
         repositorioDisciplina?.Cadastrar(entidade);
@@ -62,7 +62,7 @@ public sealed class RepositorioDisciplinaEmOrmTests
     [TestMethod]
     public void Deve_Excluir_Registro_Corretamente()
     {
-        // Arrange (Configuração)
+        // Arrange (Arranjo)
         var entidade = new Disciplina("Ciências");
 
         repositorioDisciplina?.Cadastrar(entidade);
@@ -82,7 +82,7 @@ public sealed class RepositorioDisciplinaEmOrmTests
     [TestMethod]
     public void Deve_Selecionar_Registros_Corretamente()
     {
-        // Arrange (Configuração)
+        // Arrange (Arranjo)
         var entidade = new Disciplina("Ciências");
         var entidade2 = new Disciplina("Artes");
         var entidade3 = new Disciplina("Português");
@@ -98,6 +98,9 @@ public sealed class RepositorioDisciplinaEmOrmTests
         var registros = repositorioDisciplina?.SelecionarRegistros();
 
         // Assert (Asserção)
-        CollectionAssert.AreEqual(entidades, registros);
+        CollectionAssert.AreEqual(
+            entidades.OrderBy(d => d.Nome).ToList(),
+            registros?.OrderBy(d => d.Nome).ToList()
+        );
     }
 }
