@@ -9,7 +9,7 @@ using TesteFacil.Infraestrutura.Orm.ModuloTeste;
 namespace TesteFacil.Testes.Integracao.Compartilhado;
 
 [TestClass]
-public class TestFixture
+public abstract class TestFixture
 {
     private static TesteFacilDbContextFactory? factory;
     protected TesteFacilDbContext? dbContext;
@@ -40,7 +40,7 @@ public class TestFixture
         dbContext = factory?.CriarDbContext();
 
         if (dbContext is null)
-            throw new ArgumentNullException("DbContextFactory não inicializada");
+            throw new ArgumentNullException("DbContextFactory não inicializada corretamente.");
 
         ConfigurarTabelas(dbContext);
 
