@@ -6,34 +6,53 @@ namespace TesteFacil.Testes.Integracao.Compartilhado;
 
 public class TesteDbContextFactory
 {
-    private readonly MsSqlContainer _container;
+    private readonly MsSqlContainer container;
+    private string connectionString;
 
     public TesteDbContextFactory()
     {
-        _container = new MsSqlBuilder()
-            .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+        container = new MsSqlBuilder()
+            .WithImage("mcr.microsoft.com/mssql/server:2019-latest")
             .WithCleanUp(true)
+            .WithName("teste-facil-testdb-container")
             .Build();
     }
 
     public async Task<TesteFacilDbContext> CriarDbContextAsync()
     {
-        await _container.StartAsync();
+        connectionString = string.Concat(container.GetConnectionString(), $";Initial Catalog=TesteFacilTestDb");
 
         var options = new DbContextOptionsBuilder<TesteFacilDbContext>()
-            .UseSqlServer(_container.GetConnectionString())
+            .UseSqlServer(connectionString)
             .Options;
 
         var dbContext = new TesteFacilDbContext(options);
 
-        await dbContext.Database.EnsureCreatedAsync();
+        await ConfigurarDbContext(dbContext);
 
         return dbContext;
     }
 
-    public async Task DisposeAsync()
+    public async Task InicializarAsync()
     {
-        await _container.StopAsync();
-        await _container.DisposeAsync();
+        await container.StartAsync();
+    }
+
+    public async Task EncerrarAsync()
+    {
+        await container.StopAsync();
+        await container.DisposeAsync();
+    }
+
+    private static async Task ConfigurarDbContext(TesteFacilDbContext dbContext)
+    {
+        await dbContext.Database.EnsureCreatedAsync();
+
+        dbContext.Testes.RemoveRange(dbContext.Testes);
+        dbContext.Questoes.RemoveRange(dbContext.Questoes);
+        dbContext.Materias.RemoveRange(dbContext.Materias);
+        dbContext.Disciplinas.RemoveRange(dbContext.Disciplinas);
+
+        await dbContext.SaveChangesAsync();
     }
 }

@@ -10,34 +10,43 @@ namespace TesteFacil.Testes.Integracao.ModuloDisciplina;
 [TestCategory("Testes de Integração de Disciplina")]
 public sealed class RepositorioDisciplinaEmOrmTests
 {
-    private TesteDbContextFactory factory;
+    private static TesteDbContextFactory factory;
     private TesteFacilDbContext dbContext;
     private RepositorioDisciplinaEmOrm repositorioDisciplina;
+
+    [AssemblyInitialize]
+    public static async Task Setup(TestContext context)
+    {
+        factory = new TesteDbContextFactory();
+
+        await factory.InicializarAsync();
+    }
+
+    [AssemblyCleanup]
+    public static async Task Cleanup()
+    {
+        await factory.EncerrarAsync();
+    }
 
     [TestInitialize]
     public async Task ConfigurarTestes()
     {
-        factory = new TesteDbContextFactory();
         dbContext = await factory.CriarDbContextAsync();
+
         repositorioDisciplina = new RepositorioDisciplinaEmOrm(dbContext);
 
         BuilderSetup.SetCreatePersistenceMethod<Disciplina>(repositorioDisciplina.Cadastrar);
         BuilderSetup.SetCreatePersistenceMethod<IList<Disciplina>>(repositorioDisciplina.CadastrarTodos);
     }
 
-    [TestCleanup]
-    public async Task LimparTestes()
-    {
-        await factory.DisposeAsync();
-    }
-
     [TestMethod]
     public void Deve_Cadastrar_Disciplina_Corretamente()
     {
         // Arrange
-        var disciplina = Builder<Disciplina>.CreateNew().Persist();
+        var disciplina = Builder<Disciplina>.CreateNew().Build();
 
         // Act
+        repositorioDisciplina.Cadastrar(disciplina);
         dbContext.SaveChanges();
 
         // Assert
@@ -51,10 +60,9 @@ public sealed class RepositorioDisciplinaEmOrmTests
     {
         // Arrange
         var disciplina = Builder<Disciplina>.CreateNew().Persist();
-
         dbContext.SaveChanges();
 
-        var disciplinaEditada = Builder<Disciplina>.CreateNew().Build();
+        var disciplinaEditada = new Disciplina("Português");
 
         // Act
         var conseguiuEditar = repositorioDisciplina.Editar(disciplina.Id, disciplinaEditada);
