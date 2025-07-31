@@ -7,7 +7,6 @@ namespace TesteFacil.Testes.Integracao.Compartilhado;
 public class TesteDbContextFactory
 {
     private readonly MsSqlContainer container;
-    private string connectionString;
 
     public TesteDbContextFactory()
     {
@@ -20,7 +19,7 @@ public class TesteDbContextFactory
 
     public async Task<TesteFacilDbContext> CriarDbContextAsync()
     {
-        connectionString = string.Concat(container.GetConnectionString(), $";Initial Catalog=TesteFacilTestDb");
+        var connectionString = string.Concat(container.GetConnectionString(), $";Initial Catalog=TesteFacilTestDb");
 
         var options = new DbContextOptionsBuilder<TesteFacilDbContext>()
             .UseSqlServer(connectionString)
