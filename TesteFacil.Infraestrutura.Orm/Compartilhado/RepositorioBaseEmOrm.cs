@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TesteFacil.Dominio.Compartilhado;
+using TesteFacil.Dominio.ModuloDisciplina;
 
 namespace TesteFacil.Infraestrutura.Orm.Compartilhado;
 
@@ -15,6 +16,11 @@ public class RepositorioBaseEmOrm<T> where T : EntidadeBase<T>
     public void Cadastrar(T novoRegistro)
     {
         registros.Add(novoRegistro);
+    }
+
+    public void CadastrarEntidades(IList<T> entidades)
+    {
+        registros.AddRange(entidades);
     }
 
     public bool Editar(Guid idRegistro, T registroEditado)
