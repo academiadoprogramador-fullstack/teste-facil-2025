@@ -12,14 +12,17 @@ namespace TesteFacil.Testes.Integracao.ModuloMateria;
 [TestCategory("Testes de Integração de Matéria")]
 public class RepositorioMateriaEmOrmTests
 {
-    private TesteFacilDbContext dbContext;
+    private TesteFacilDbContext? dbContext;
     private RepositorioDisciplinaEmOrm repositorioDisciplina;
     private RepositorioMateriaEmOrm repositorioMateria;
 
     [TestInitialize]
     public void ConfigurarTestes()
     {
-        dbContext = TesteDbContextFactory.CriarDbContext();
+        dbContext = AssemblyConfig.DbContextFactory?.CriarDbContext();
+
+        if (dbContext is null)
+            throw new ArgumentNullException("DbContextFactory não inicializada");
 
         repositorioDisciplina = new RepositorioDisciplinaEmOrm(dbContext);
         repositorioMateria = new RepositorioMateriaEmOrm(dbContext);
@@ -38,7 +41,7 @@ public class RepositorioMateriaEmOrmTests
 
         // Act
         repositorioMateria.Cadastrar(materia);
-        dbContext.SaveChanges();
+        dbContext?.SaveChanges();
 
         // Assert
         var materiaSelecionada = repositorioMateria.SelecionarRegistroPorId(materia.Id);
@@ -54,13 +57,13 @@ public class RepositorioMateriaEmOrmTests
 
         var materia = new Materia("Quatro Operações", SerieMateria.SegundaSerie, disciplina);
         repositorioMateria.Cadastrar(materia);
-        dbContext.SaveChanges();
+        dbContext?.SaveChanges();
 
         var materiaEditada = new Materia("Álgebra Linear", SerieMateria.SegundaSerie, disciplina);
 
         // Act
         var conseguiuEditar = repositorioMateria.Editar(materia.Id, materiaEditada);
-        dbContext.SaveChanges();
+        dbContext?.SaveChanges();
 
         // Assert
         var registroSelecionado = repositorioMateria.SelecionarRegistroPorId(materia.Id);
@@ -68,7 +71,6 @@ public class RepositorioMateriaEmOrmTests
         Assert.IsTrue(conseguiuEditar);
         Assert.AreEqual(materia, registroSelecionado);
     }
-
 
     [TestMethod]
     public void Deve_Excluir_Materia_Corretamente()
@@ -78,11 +80,11 @@ public class RepositorioMateriaEmOrmTests
 
         var materia = new Materia("Quatro Operações", SerieMateria.SegundaSerie, disciplina);
         repositorioMateria.Cadastrar(materia);
-        dbContext.SaveChanges();
+        dbContext?.SaveChanges();
 
         // Act
         var conseguiuExcluir = repositorioMateria.Excluir(materia.Id);
-        dbContext.SaveChanges();
+        dbContext?.SaveChanges();
 
         // Assert
         var registroSelecionado = repositorioMateria.SelecionarRegistroPorId(materia.Id);
@@ -105,7 +107,7 @@ public class RepositorioMateriaEmOrmTests
         repositorioMateria.Cadastrar(materia2);
         repositorioMateria.Cadastrar(materia3);
 
-        dbContext.SaveChanges();
+        dbContext?.SaveChanges();
 
         List<Materia> materiasEsperadas = [materia, materia2, materia3];
 
@@ -123,8 +125,8 @@ public class RepositorioMateriaEmOrmTests
 
     private void CadastrarVariasDisciplinas(IList<Disciplina> disciplinas)
     {
-        dbContext.Disciplinas.AddRange(disciplinas);
+        dbContext?.Disciplinas.AddRange(disciplinas);
 
-        dbContext.SaveChanges();
+        dbContext?.SaveChanges();
     }
 }
