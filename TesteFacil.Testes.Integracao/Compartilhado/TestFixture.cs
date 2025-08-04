@@ -1,4 +1,6 @@
-﻿using FizzWare.NBuilder;
+﻿using DotNet.Testcontainers.Containers;
+using FizzWare.NBuilder;
+using Testcontainers.MsSql;
 using TesteFacil.Dominio.ModuloDisciplina;
 using TesteFacil.Infraestrutura.Orm.Compartilhado;
 using TesteFacil.Infraestrutura.Orm.ModuloDisciplina;
@@ -11,7 +13,6 @@ namespace TesteFacil.Testes.Integracao.Compartilhado;
 [TestClass]
 public abstract class TestFixture
 {
-    private static TesteFacilDbContextFactory? factory;
     protected TesteFacilDbContext? dbContext;
 
     protected RepositorioTesteEmOrm? repositorioTeste;
@@ -19,28 +20,33 @@ public abstract class TestFixture
     protected RepositorioMateriaEmOrm? repositorioMateria;
     protected RepositorioDisciplinaEmOrm? repositorioDisciplina;
 
+    private static IDatabaseContainer? dbContainer;
+
     [AssemblyInitialize]
     public static async Task Setup(TestContext _)
     {
-        factory = new TesteFacilDbContextFactory();
+        dbContainer = new MsSqlBuilder()
+            .WithImage("mcr.microsoft.com/mssql/server:2019-latest")
+            .WithName("teste-facil-testdb-container")
+            .WithCleanUp(true)
+            .Build();
 
-        await factory.InicializarAsync();
+        await InicializarContainerBancoDadosAsync(dbContainer);
     }
 
     [AssemblyCleanup]
     public static async Task Teardown()
     {
-        if (factory is not null)
-            await factory.EncerrarAsync();
+        await PararContainerBancoDadosAsync();
     }
 
     [TestInitialize]
     public void ConfigurarTestes()
     {
-        dbContext = factory?.CriarDbContext();
+        if (dbContainer is null)
+            throw new ArgumentNullException("O Banco de dados não foi inicializado.");
 
-        if (dbContext is null)
-            throw new ArgumentNullException("DbContextFactory não inicializada corretamente.");
+        dbContext = TesteFacilDbContextFactory.CriarDbContext(dbContainer.GetConnectionString());
 
         ConfigurarTabelas(dbContext);
 
@@ -63,5 +69,19 @@ public abstract class TestFixture
         dbContext.Disciplinas.RemoveRange(dbContext.Disciplinas);
 
         dbContext.SaveChanges();
+    }
+
+    private static async Task InicializarContainerBancoDadosAsync(IDatabaseContainer dbContainer)
+    {
+        await dbContainer.StartAsync();
+    }
+
+    private static async Task PararContainerBancoDadosAsync()
+    {
+        if (dbContainer is null)
+            throw new ArgumentNullException("O Banco de dados não foi inicializado.");
+
+        await dbContainer.StopAsync();
+        await dbContainer.DisposeAsync();
     }
 }
