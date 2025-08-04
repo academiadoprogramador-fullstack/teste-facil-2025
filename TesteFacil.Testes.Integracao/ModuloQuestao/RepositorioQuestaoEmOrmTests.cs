@@ -8,14 +8,14 @@ namespace TesteFacil.Testes.Integracao.ModuloQuestao;
 
 [TestClass]
 [TestCategory("Testes de Integração de Questões")]
-public class RepositorioQuestaoEmOrmTests : TestFixture
+public sealed class RepositorioQuestaoEmOrmTests : TestFixture
 {
     [TestMethod]
     public void Deve_Cadastrar_Questao_Corretamente()
     {
         // Arrange
         var disciplina = Builder<Disciplina>.CreateNew()
-            .With(m => m.Nome = "Matemática")
+            .With(d => d.Nome = "Matemática")
             .Persist();
 
         var materia = Builder<Materia>.CreateNew()
@@ -40,7 +40,7 @@ public class RepositorioQuestaoEmOrmTests : TestFixture
     {
         // Arrange
         var disciplina = Builder<Disciplina>.CreateNew()
-            .With(m => m.Nome = "Matemática")
+            .With(d => d.Nome = "Matemática")
             .Persist();
 
         var materia = Builder<Materia>.CreateNew()
@@ -71,7 +71,7 @@ public class RepositorioQuestaoEmOrmTests : TestFixture
     {
         // Arrange
         var disciplina = Builder<Disciplina>.CreateNew()
-            .With(m => m.Nome = "Matemática")
+            .With(d => d.Nome = "Matemática")
             .Persist();
 
         var materia = Builder<Materia>.CreateNew()
@@ -100,7 +100,7 @@ public class RepositorioQuestaoEmOrmTests : TestFixture
     {
         // Arrange
         var disciplina = Builder<Disciplina>.CreateNew()
-            .With(m => m.Nome = "Matemática")
+            .With(d => d.Nome = "Matemática")
             .Persist();
 
         var materias = Builder<Materia>.CreateListOfSize(3)
