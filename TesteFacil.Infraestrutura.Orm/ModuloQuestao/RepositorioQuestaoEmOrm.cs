@@ -14,6 +14,7 @@ public class RepositorioQuestaoEmOrm : RepositorioBaseEmOrm<Questao>, IRepositor
     public List<Questao> SelecionarQuestoesPorDisciplinaESerie(Guid disciplinaId, SerieMateria serie, int quantidadeQuestoes)
     {
         return registros
+            .OrderBy(x => x.Enunciado)
             .Include(q => q.Alternativas)
             .Include(q => q.Materia)
             .ThenInclude(m => m.Disciplina)
@@ -26,6 +27,7 @@ public class RepositorioQuestaoEmOrm : RepositorioBaseEmOrm<Questao>, IRepositor
     public List<Questao> SelecionarQuestoesPorMateria(Guid materiaId, int quantidadeQuestoes)
     {
         return registros
+            .OrderBy(x => x.Enunciado)
             .Include(q => q.Alternativas)
             .Include(q => q.Materia)
             .Where(x => x.Materia.Id.Equals(materiaId))
@@ -44,6 +46,7 @@ public class RepositorioQuestaoEmOrm : RepositorioBaseEmOrm<Questao>, IRepositor
     public override List<Questao> SelecionarRegistros()
     {
         return registros
+            .OrderBy(x => x.Enunciado)
             .Include(x => x.Alternativas)
             .Include(x => x.Materia)
             .ToList();
