@@ -31,14 +31,6 @@ public class Disciplina : EntidadeBase<Disciplina>
         Materias.Add(materia);
     }
 
-    public void RemoverQuestao(Materia materia)
-    {
-        if (!Materias.Contains(materia))
-            return;
-
-        Materias.Remove(materia);
-    }
-
     public List<Questao> ObterQuestoesAleatorias(int quantidadeQuestoes, SerieMateria serie)
     {
         var questoesRelacionadas = new List<Questao>();
