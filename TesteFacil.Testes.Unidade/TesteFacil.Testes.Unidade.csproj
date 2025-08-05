@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Moq" Version="4.20.72" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TesteFacil.Aplicacao\TesteFacil.Aplicacao.csproj" />
     <ProjectReference Include="..\TesteFacil.Dominio\TesteFacil.Dominio.csproj" />
   </ItemGroup>
 
