@@ -27,6 +27,14 @@ public class Materia : EntidadeBase<Materia>
         Disciplina = disciplina;
     }
 
+    public void AdicionarQuestoes(List<Questao> questoes)
+    {
+        if (Questoes.Any(questoes.Contains))
+            return;
+
+        Questoes.AddRange(questoes);
+    }
+
     public void AdicionarQuestao(Questao questao)
     {
         if (Questoes.Contains(questao))
