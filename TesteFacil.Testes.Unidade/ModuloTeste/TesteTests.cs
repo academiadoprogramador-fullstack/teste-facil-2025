@@ -7,14 +7,14 @@ namespace TesteFacil.Testes.Unidade.ModuloTeste;
 
 [TestClass]
 [TestCategory("Testes de Unidade de Teste")]
-public sealed class TesteDomainTests
+public sealed class TesteTests
 {
     private Teste? teste;
 
     private readonly Disciplina disciplinaMatematica;
     private readonly Materia materiaQuatroOperacoes;
 
-    public TesteDomainTests()
+    public TesteTests()
     {
         disciplinaMatematica = new Disciplina("Matemática");
 
