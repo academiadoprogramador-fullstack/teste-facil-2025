@@ -23,6 +23,14 @@ public class Disciplina : EntidadeBase<Disciplina>
         Nome = nome;
     }
 
+    public void AdicionarMateria(Materia materia)
+    {
+        if (Materias.Contains(materia))
+            return;
+
+        Materias.Add(materia);
+    }
+
     public List<Questao> ObterQuestoesAleatorias(int quantidadeQuestoes, SerieMateria serie)
     {
         var questoesRelacionadas = new List<Questao>();
