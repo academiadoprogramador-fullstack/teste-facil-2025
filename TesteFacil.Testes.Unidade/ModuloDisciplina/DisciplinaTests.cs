@@ -7,7 +7,7 @@ namespace TesteFacil.Testes.Unidade.ModuloDisciplina;
 
 [TestClass]
 [TestCategory("Testes de Unidade de Disciplina")]
-public class DisciplinaDomainTests
+public sealed class DisciplinaTests
 {
     private Disciplina? disciplina;
 
