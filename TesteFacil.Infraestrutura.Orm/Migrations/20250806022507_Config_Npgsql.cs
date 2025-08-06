@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace TesteFacil.Infraestrutura.Orm.Migrations
 {
     /// <inheritdoc />
-    public partial class Add_Initial_Config : Migration
+    public partial class Config_Npgsql : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -38,8 +39,7 @@ namespace TesteFacil.Infraestrutura.Orm.Migrations
                         name: "FK_Materias_Disciplinas_DisciplinaId",
                         column: x => x.DisciplinaId,
                         principalTable: "Disciplinas",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(

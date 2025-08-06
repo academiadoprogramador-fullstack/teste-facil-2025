@@ -181,7 +181,7 @@ namespace TesteFacil.Infraestrutura.Orm.Migrations
                     b.HasOne("TesteFacil.Dominio.ModuloDisciplina.Disciplina", "Disciplina")
                         .WithMany("Materias")
                         .HasForeignKey("DisciplinaId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Disciplina");
