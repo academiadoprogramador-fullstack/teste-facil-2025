@@ -14,7 +14,7 @@ public static class EntityFrameworkConfig
         var connectionString = configuration["SQL_CONNECTION_STRING"];
 
         services.AddDbContext<IUnitOfWork, TesteFacilDbContext>(options =>
-            options.UseNpgsql(connectionString));
+            options.UseNpgsql(connectionString, (opt) => opt.EnableRetryOnFailure(3)));
     }
 }
 
