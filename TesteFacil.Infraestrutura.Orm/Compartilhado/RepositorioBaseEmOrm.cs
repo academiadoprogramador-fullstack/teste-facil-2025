@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TesteFacil.Dominio.Compartilhado;
-using TesteFacil.Dominio.ModuloDisciplina;
 
 namespace TesteFacil.Infraestrutura.Orm.Compartilhado;
 

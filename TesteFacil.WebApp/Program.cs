@@ -34,7 +34,7 @@ public class Program
 
         builder.Services.AddSerilogConfig(builder.Logging, builder.Configuration);
         builder.Services.AddQuestPDFConfig();
-        builder.Services.AddGeminiChatConfig();
+        builder.Services.AddGeminiChatConfig(builder.Configuration);
 
         builder.Services.AddControllersWithViews(options =>
         {

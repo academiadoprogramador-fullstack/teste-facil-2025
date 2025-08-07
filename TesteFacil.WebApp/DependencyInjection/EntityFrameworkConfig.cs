@@ -13,6 +13,9 @@ public static class EntityFrameworkConfig
     {
         var connectionString = configuration["SQL_CONNECTION_STRING"];
 
+        if (string.IsNullOrWhiteSpace(connectionString))
+            throw new Exception("A variável SQL_CONNECTION_STRING não foi fornecida.");
+
         services.AddDbContext<IUnitOfWork, TesteFacilDbContext>(options =>
             options.UseNpgsql(connectionString, (opt) => opt.EnableRetryOnFailure(3)));
     }

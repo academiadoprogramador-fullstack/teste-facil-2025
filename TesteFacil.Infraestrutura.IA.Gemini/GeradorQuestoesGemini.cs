@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
 using System.Text;
 using TesteFacil.Dominio.ModuloQuestao;
-using Microsoft.Extensions.Configuration;
 using TesteFacil.Dominio.ModuloMateria;
 using TesteFacil.Infraestrutura.IA.Gemini.DTOs;
 
@@ -10,16 +9,12 @@ namespace TesteFacil.Infraestrutura.IA.Gemini;
 public class GeradorQuestoesGemini : IGeradorQuestoes
 {
     private readonly HttpClient _httpClient;
-    private readonly string _geminiEndpoint;
 
     private readonly JsonSerializerOptions _jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
 
-    public GeradorQuestoesGemini(IHttpClientFactory httpClientFactory, IConfiguration configuration)
+    public GeradorQuestoesGemini(IHttpClientFactory httpClientFactory)
     {
-        _httpClient = httpClientFactory.CreateClient();
-
-        _geminiEndpoint = string.Concat("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=", 
-            configuration["GEMINI_API_KEY"]);
+        _httpClient = httpClientFactory.CreateClient(nameof(GeradorQuestoesGemini));
     }
 
     public async Task<List<Questao>> GerarQuestoesAsync(Materia materia, int quantidade)
@@ -60,7 +55,7 @@ public class GeradorQuestoesGemini : IGeradorQuestoes
 
         var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync(_geminiEndpoint, content);
+        var response = await _httpClient.PostAsync(string.Empty, content);
 
         response.EnsureSuccessStatusCode();
 
