@@ -17,4 +17,3 @@ public static class EntityFrameworkConfig
             options.UseNpgsql(connectionString, (opt) => opt.EnableRetryOnFailure(3)));
     }
 }
-
