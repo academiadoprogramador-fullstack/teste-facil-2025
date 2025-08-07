@@ -22,18 +22,15 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        if (builder.Environment.IsDevelopment())
-        {
-            builder.Services.AddScoped<DisciplinaAppService>();
-            builder.Services.AddScoped<MateriaAppService>();
-            builder.Services.AddScoped<QuestaoAppService>();
-            builder.Services.AddScoped<TesteAppService>();
-            builder.Services.AddScoped<IRepositorioDisciplina, RepositorioDisciplinaEmOrm>();
-            builder.Services.AddScoped<IRepositorioMateria, RepositorioMateriaEmOrm>();
-            builder.Services.AddScoped<IRepositorioQuestao, RepositorioQuestaoEmOrm>();
-            builder.Services.AddScoped<IRepositorioTeste, RepositorioTesteEmOrm>();
-            builder.Services.AddEntityFrameworkConfig(builder.Configuration);
-        }
+        builder.Services.AddScoped<DisciplinaAppService>();
+        builder.Services.AddScoped<MateriaAppService>();
+        builder.Services.AddScoped<QuestaoAppService>();
+        builder.Services.AddScoped<TesteAppService>();
+        builder.Services.AddScoped<IRepositorioDisciplina, RepositorioDisciplinaEmOrm>();
+        builder.Services.AddScoped<IRepositorioMateria, RepositorioMateriaEmOrm>();
+        builder.Services.AddScoped<IRepositorioQuestao, RepositorioQuestaoEmOrm>();
+        builder.Services.AddScoped<IRepositorioTeste, RepositorioTesteEmOrm>();
+        builder.Services.AddEntityFrameworkConfig(builder.Configuration);
 
         builder.Services.AddSerilogConfig(builder.Logging, builder.Configuration);
         builder.Services.AddQuestPDFConfig();
