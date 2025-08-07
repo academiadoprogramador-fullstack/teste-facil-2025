@@ -35,7 +35,7 @@ public class Program
             builder.Services.AddEntityFrameworkConfig(builder.Configuration);
         }
 
-        builder.Services.AddSerilogConfig(builder.Logging);
+        builder.Services.AddSerilogConfig(builder.Logging, builder.Configuration);
         builder.Services.AddQuestPDFConfig();
         builder.Services.AddGeminiChatConfig();
 
