@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TesteFacil.Infraestrutura.Orm.Compartilhado;
 
-namespace TesteFacil.Testes.Integracao.Compartilhado;
+namespace TesteFacil.Infraestrutura.Orm.Compartilhado;
 
 public static class TesteFacilDbContextFactory
 {
