@@ -8,23 +8,11 @@ namespace TesteFacil.Testes.Interface.Compartilhado;
 [TestClass]
 public abstract class TestFixture
 {
-    protected static IWebDriver? webDriver;
+    protected static IWebDriver? driver;
     protected TesteFacilDbContext? dbContext;
 
     protected static string enderecoBase = "https://localhost:7056";
     private static string connectionString = "Host=localhost;Port=5432;Database=TesteFacilDb;Username=postgres;Password=YourStrongPassword";
-
-    //[AssemblyInitialize]
-    //public static void Setup(TestContext _)
-    //{
-    //    InicializarWebDriver();
-    //}
-
-    //[AssemblyCleanup]
-    //public static void Teardown()
-    //{
-    //    EncerrarWebDriver();
-    //}
 
     [TestInitialize]
     public void ConfigurarTestes()
@@ -47,13 +35,13 @@ public abstract class TestFixture
         var options = new ChromeOptions();
         options.AddArgument("--headless");
 
-        webDriver = new ChromeDriver(options);
+        driver = new ChromeDriver(options);
     }
 
     private static void EncerrarWebDriver()
     {
-        webDriver?.Quit();
-        webDriver?.Dispose();
+        driver?.Quit();
+        driver?.Dispose();
     }
 
     private static void ConfigurarTabelas(TesteFacilDbContext dbContext)
