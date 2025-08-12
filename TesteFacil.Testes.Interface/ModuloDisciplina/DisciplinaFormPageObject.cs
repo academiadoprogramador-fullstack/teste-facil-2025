@@ -11,7 +11,10 @@ public class DisciplinaFormPageObject
     public DisciplinaFormPageObject(IWebDriver driver)
     {
         this.driver = driver;
-        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+        
+        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+
+        wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
     }
 
     public DisciplinaFormPageObject PreencherNome(string nome)
@@ -25,18 +28,7 @@ public class DisciplinaFormPageObject
 
     public DisciplinaIndexPageObject Confirmar()
     {
-        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
-
-        wait.Until(d => d.FindElements(By.CssSelector(".card")).Count == 1);
-
-        return new DisciplinaIndexPageObject(driver!);
-    }
-
-    public DisciplinaIndexPageObject ConfirmarExclusao()
-    {
-        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
-
-        wait.Until(d => d.FindElements(By.CssSelector(".card")).Count == 0);
+        wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
 
         return new DisciplinaIndexPageObject(driver!);
     }

@@ -64,7 +64,7 @@ public sealed class DisciplinaInterfaceTests : TestFixture
         // Act
         disciplinaIndex
             .ClickExcluir()
-            .ConfirmarExclusao();
+            .Confirmar();
 
         // Assert
         Assert.IsFalse(disciplinaIndex.ContemDisciplina("Matemática"));
