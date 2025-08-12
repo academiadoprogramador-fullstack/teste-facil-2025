@@ -6,6 +6,7 @@ using TesteFacil.Dominio.ModuloDisciplina;
 using TesteFacil.Dominio.ModuloMateria;
 using TesteFacil.Dominio.ModuloQuestao;
 using TesteFacil.Dominio.ModuloTeste;
+using TesteFacil.Infraestrutura.Orm.Compartilhado;
 using TesteFacil.Infraestrutura.Orm.ModuloDisciplina;
 using TesteFacil.Infraestrutura.Orm.ModuloMateria;
 using TesteFacil.Infraestrutura.Orm.ModuloQuestao;
@@ -41,6 +42,9 @@ public class Program
             options.Filters.Add<ValidarModeloAttribute>();
         });
 
+        builder.Services.AddHealthChecks()
+            .AddDbContextCheck<TesteFacilDbContext>();
+
         var app = builder.Build();
 
         if (app.Environment.IsDevelopment())
@@ -57,6 +61,8 @@ public class Program
         app.UseAntiforgery();
         app.UseStaticFiles();
         app.UseRouting();
+        
+        app.MapHealthChecks("/health");
 
         app.MapDefaultControllerRoute();
 
