@@ -13,11 +13,11 @@ namespace TesteFacil.Testes.Interface.Compartilhado;
 public abstract class TestFixture
 {
     protected static IWebDriver? driver;
-    protected static TesteFacilDbContext? dbContext;
     protected readonly static string enderecoBase = "https://localhost:7056";
 
-    private static IDatabaseContainer? dbContainer;
     private static IConfiguration? configuracao;
+    private static IDatabaseContainer? dbContainer;
+    private static TesteFacilDbContext? dbContext;
     private static Process? processoAplicacao;
 
     [AssemblyInitialize]
@@ -46,24 +46,24 @@ public abstract class TestFixture
     }
 
     [TestInitialize]
-    public void ConfigurarTeste()
+    public async Task ConfigurarTeste()
     {
         if (dbContainer is null)
             throw new ArgumentNullException("O banco de dados não foi inicializado.");
 
         dbContext = TesteFacilDbContextFactory.CriarDbContext(dbContainer.GetConnectionString());
 
-        ConfigurarTabelas(dbContext);
+        await ConfigurarTabelasAsync(dbContext);
     }
 
-    private static void ConfigurarTabelas(TesteFacilDbContext dbContext)
+    private static async Task ConfigurarTabelasAsync(TesteFacilDbContext dbContext)
     {
         dbContext.Testes.RemoveRange(dbContext.Testes);
         dbContext.Questoes.RemoveRange(dbContext.Questoes);
         dbContext.Materias.RemoveRange(dbContext.Materias);
         dbContext.Disciplinas.RemoveRange(dbContext.Disciplinas);
 
-        dbContext.SaveChanges();
+        await dbContext.SaveChangesAsync();
     }
 
     private static async Task InicializarPostgreSqlAsync()
@@ -165,7 +165,7 @@ public abstract class TestFixture
                 // Ignora erros de conexão enquanto a app sobe
             }
 
-            Thread.Sleep(500);
+            await Task.Delay(500);
         }
 
         throw new Exception("Aplicação não ficou pronta no tempo limite.");

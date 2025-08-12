@@ -16,6 +16,8 @@ public sealed class MateriaInterfaceTests : TestFixture
 
         driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "disciplinas", "cadastrar"));
 
+        wait.Until(d => d.FindElement(By.CssSelector("form")));
+
         driver?.FindElement(By.Id("Nome")).SendKeys("Matemática");
 
         driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
@@ -23,6 +25,8 @@ public sealed class MateriaInterfaceTests : TestFixture
         wait.Until(d => d.FindElements(By.CssSelector(".card")).Count == 1);
 
         driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "materias", "cadastrar"));
+
+        wait.Until(d => d.FindElement(By.CssSelector("form")));
 
         // Act
         driver?.FindElement(By.Id("Nome")).SendKeys("Quatro Operações");
@@ -38,10 +42,84 @@ public sealed class MateriaInterfaceTests : TestFixture
         driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
 
         // Assert
+        wait.Until(d => d.PageSource.Contains("Quatro Operações"));
+
+        Assert.IsTrue(driver?.PageSource.Contains("Quatro Operações"));
+    }
+
+    [TestMethod]
+    public void Deve_Editar_Materia_Corretamente()
+    {
+        // Arrange
+        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(5));
+
+        driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "disciplinas", "cadastrar"));
+
+        wait.Until(d => d.FindElement(By.CssSelector("form")));
+
+        driver?.FindElement(By.Id("Nome")).SendKeys("Matemática");
+
+        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
+
         wait.Until(d => d.FindElements(By.CssSelector(".card")).Count == 1);
 
-        var elementosCard = driver?.FindElements(By.CssSelector(".card"));
+        driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "materias", "cadastrar"));
 
-        Assert.AreEqual(1, elementosCard?.Count);
+        driver?.FindElement(By.Id("Nome")).SendKeys("Quatro Operações");
+
+        new SelectElement(driver?.FindElement(By.Id("Serie"))!).SelectByText("Segunda Série");
+
+        new SelectElement(driver?.FindElement(By.Id("DisciplinaId"))!).SelectByText("Matemática");
+
+        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
+
+        wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Edição']"))).Click();
+
+        // Act
+        wait.Until(d => d.FindElement(By.CssSelector("form")));
+
+        driver?.FindElement(By.Id("Nome")).SendKeys(" Editada");
+
+        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
+
+        // Assert
+        wait.Until(d => d.PageSource.Contains("Quatro Operações Editada"));
+
+        Assert.IsTrue(driver?.PageSource.Contains("Quatro Operações Editada"));
+    }
+
+    [TestMethod]
+    public void Deve_Excluir_Materia_Corretamente()
+    {
+        // Arrange
+        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(5));
+
+        driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "disciplinas", "cadastrar"));
+
+        wait.Until(d => d.FindElement(By.CssSelector("form")));
+
+        driver?.FindElement(By.Id("Nome")).SendKeys("Matemática");
+
+        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
+
+        driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "materias", "cadastrar"));
+
+        driver?.FindElement(By.Id("Nome")).SendKeys("Quatro Operações");
+
+        new SelectElement(driver?.FindElement(By.Id("Serie"))!).SelectByText("Segunda Série");
+
+        new SelectElement(driver?.FindElement(By.Id("DisciplinaId"))!).SelectByText("Matemática");
+
+        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
+
+        wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Exclusão']"))).Click();
+
+        // Act
+        wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
+
+        // Assert
+        wait.Until(d => !d.PageSource.Contains("Quatro Operações"));
+
+        Assert.IsFalse(driver?.PageSource.Contains("Quatro Operações"));
     }
 }

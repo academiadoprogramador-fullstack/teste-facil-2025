@@ -120,7 +120,7 @@ public class MateriaAppService
                 return Result.Fail(erro);
             }
 
-            repositorioDisciplina.Excluir(id);
+            repositorioMateria.Excluir(id);
 
             unitOfWork.Commit();
 

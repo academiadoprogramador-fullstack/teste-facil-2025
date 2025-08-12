@@ -37,14 +37,13 @@ public sealed class DisciplinaInterfaceTests : TestFixture
 
         driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "disciplinas", "cadastrar"));
 
+        wait.Until(d => d.FindElement(By.CssSelector("form")));
+
         driver?.FindElement(By.Id("Nome")).SendKeys("Matemática");
 
-        driver?.FindElement(By.CssSelector("button[type='submit']")).Click(); // redirect
+        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
 
-        wait.Until(d => d.FindElements(By.CssSelector(".card")).Count == 1);
-
-        driver?.FindElement(By.CssSelector(".card"))
-            .FindElement(By.CssSelector("a[title='Edição']")).Click();
+        wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Edição']"))).Click();
 
         // Act
         driver?.FindElement(By.Id("Nome")).SendKeys(" Editada");
@@ -52,8 +51,33 @@ public sealed class DisciplinaInterfaceTests : TestFixture
         driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
 
         // Assert
-        wait.Until(d => d.FindElements(By.CssSelector(".card")).Count == 1);
+        wait.Until(d => d.PageSource.Contains("Matemática Editada"));
 
         Assert.IsTrue(driver?.PageSource.Contains("Matemática Editada"));
+    }
+
+    [TestMethod]
+    public void Deve_Excluir_Disciplina_Corretamente()
+    {
+        // Arrange
+        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(5));
+
+        driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "disciplinas", "cadastrar"));
+
+        wait.Until(d => d.FindElement(By.CssSelector("form")));
+
+        driver?.FindElement(By.Id("Nome")).SendKeys("Matemática");
+
+        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
+
+        wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Exclusão']"))).Click();
+
+        // Act
+        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
+
+        // Assert
+        wait.Until(d => !d.PageSource.Contains("Matemática"));
+
+        Assert.IsFalse(driver?.PageSource.Contains("Matemática"));
     }
 }
