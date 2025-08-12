@@ -195,7 +195,7 @@ public abstract class TestFixture
         var options = new ChromeOptions();
 
         options.AddArguments(
-            "--headless",
+            //"--headless",
             "--ignore-certificate-errors",
             "--disable-dev-shm-usage",                 // Superar limitações de recursos
             "--disable-gpu",                           // Desabilitar GPU em headless,
