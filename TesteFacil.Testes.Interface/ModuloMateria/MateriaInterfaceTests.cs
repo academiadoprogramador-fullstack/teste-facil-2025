@@ -1,6 +1,7 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using TesteFacil.Testes.Interface.Compartilhado;
+using TesteFacil.Testes.Interface.ModuloDisciplina;
 
 namespace TesteFacil.Testes.Interface.ModuloMateria;
 
@@ -12,114 +13,85 @@ public sealed class MateriaInterfaceTests : TestFixture
     public void Deve_Cadastrar_Materia_Corretamente()
     {
         // Arrange
-        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(5));
-
-        driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "disciplinas", "cadastrar"));
-
-        wait.Until(d => d.FindElement(By.CssSelector("form")));
-
-        driver?.FindElement(By.Id("Nome")).SendKeys("Matemática");
-
-        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
-
-        wait.Until(d => d.FindElements(By.CssSelector(".card")).Count == 1);
-
-        driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "materias", "cadastrar"));
-
-        wait.Until(d => d.FindElement(By.CssSelector("form")));
+        new DisciplinaIndexPageObject(driver!)
+           .IrPara(enderecoBase)
+           .ClickCadastrar()
+           .PreencherNome("Matemática")
+           .Confirmar();
 
         // Act
-        driver?.FindElement(By.Id("Nome")).SendKeys("Quatro Operações");
+        var materiaIndex = new MateriaIndexPageObject(driver!)
+           .IrPara(enderecoBase);
 
-        var selectSerie = new SelectElement(driver?.FindElement(By.Id("Serie"))!);
-
-        selectSerie.SelectByText("Segunda Série");
-
-        var selectDisciplina = new SelectElement(driver?.FindElement(By.Id("DisciplinaId"))!);
-
-        selectDisciplina.SelectByText("Matemática");
-
-        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
+        materiaIndex
+            .ClickCadastrar()
+            .PreencherNome("Quatro Operações")
+            .SelecionarSerie("Segunda Série")
+            .SelecionarDisciplina("Matemática")
+            .Confirmar();
 
         // Assert
-        wait.Until(d => d.PageSource.Contains("Quatro Operações"));
-
-        Assert.IsTrue(driver?.PageSource.Contains("Quatro Operações"));
+        Assert.IsTrue(materiaIndex.ContemMateria("Quatro Operações"));
     }
 
     [TestMethod]
     public void Deve_Editar_Materia_Corretamente()
     {
         // Arrange
-        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(5));
+        new DisciplinaIndexPageObject(driver!)
+           .IrPara(enderecoBase)
+           .ClickCadastrar()
+           .PreencherNome("Matemática")
+           .Confirmar();
 
-        driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "disciplinas", "cadastrar"));
+        var materiaIndex = new MateriaIndexPageObject(driver!)
+            .IrPara(enderecoBase);
 
-        wait.Until(d => d.FindElement(By.CssSelector("form")));
-
-        driver?.FindElement(By.Id("Nome")).SendKeys("Matemática");
-
-        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
-
-        wait.Until(d => d.FindElements(By.CssSelector(".card")).Count == 1);
-
-        driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "materias", "cadastrar"));
-
-        driver?.FindElement(By.Id("Nome")).SendKeys("Quatro Operações");
-
-        new SelectElement(driver?.FindElement(By.Id("Serie"))!).SelectByText("Segunda Série");
-
-        new SelectElement(driver?.FindElement(By.Id("DisciplinaId"))!).SelectByText("Matemática");
-
-        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
-
-        wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Edição']"))).Click();
+        materiaIndex
+            .ClickCadastrar()
+            .PreencherNome("Quatro Operações")
+            .SelecionarSerie("Segunda Série")
+            .SelecionarDisciplina("Matemática")
+            .Confirmar();
 
         // Act
-        wait.Until(d => d.FindElement(By.CssSelector("form")));
-
-        driver?.FindElement(By.Id("Nome")).SendKeys(" Editada");
-
-        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
+        materiaIndex
+            .ClickEditar()
+            .PreencherNome("Quatro Operações Editada")
+            .SelecionarSerie("Primeira Série")
+            .SelecionarDisciplina("Matemática")
+            .Confirmar();
 
         // Assert
-        wait.Until(d => d.PageSource.Contains("Quatro Operações Editada"));
-
-        Assert.IsTrue(driver?.PageSource.Contains("Quatro Operações Editada"));
+        Assert.IsTrue(materiaIndex.ContemMateria("Quatro Operações Editada"));
     }
 
     [TestMethod]
     public void Deve_Excluir_Materia_Corretamente()
     {
         // Arrange
-        var wait = new WebDriverWait(driver!, TimeSpan.FromSeconds(5));
+        new DisciplinaIndexPageObject(driver!)
+            .IrPara(enderecoBase)
+            .ClickCadastrar()
+            .PreencherNome("Matemática")
+            .Confirmar();
 
-        driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "disciplinas", "cadastrar"));
+        var materiaIndex = new MateriaIndexPageObject(driver!)
+            .IrPara(enderecoBase);
 
-        wait.Until(d => d.FindElement(By.CssSelector("form")));
-
-        driver?.FindElement(By.Id("Nome")).SendKeys("Matemática");
-
-        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
-
-        driver?.Navigate().GoToUrl(Path.Combine(enderecoBase, "materias", "cadastrar"));
-
-        driver?.FindElement(By.Id("Nome")).SendKeys("Quatro Operações");
-
-        new SelectElement(driver?.FindElement(By.Id("Serie"))!).SelectByText("Segunda Série");
-
-        new SelectElement(driver?.FindElement(By.Id("DisciplinaId"))!).SelectByText("Matemática");
-
-        driver?.FindElement(By.CssSelector("button[type='submit']")).Click();
-
-        wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Exclusão']"))).Click();
-
+        materiaIndex
+            .ClickCadastrar()
+            .PreencherNome("Quatro Operações")
+            .SelecionarSerie("Segunda Série")
+            .SelecionarDisciplina("Matemática")
+            .Confirmar();
+        
         // Act
-        wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
+        materiaIndex
+            .ClickExcluir()
+            .ConfirmarExclusao();
 
         // Assert
-        wait.Until(d => !d.PageSource.Contains("Quatro Operações"));
-
-        Assert.IsFalse(driver?.PageSource.Contains("Quatro Operações"));
+        Assert.IsFalse(materiaIndex.ContemMateria("Quatro Operações"));
     }
 }

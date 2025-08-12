@@ -13,7 +13,7 @@ public class DisciplinaFormPageObject
         this.driver = driver;
 
         wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
-        wait.Until(d => d.FindElement(By.CssSelector("form")));
+        wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
     }
 
     public DisciplinaFormPageObject PreencherNome(string nome)
