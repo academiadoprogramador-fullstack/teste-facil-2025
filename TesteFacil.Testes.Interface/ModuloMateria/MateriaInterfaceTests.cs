@@ -1,6 +1,4 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
-using TesteFacil.Testes.Interface.Compartilhado;
+﻿using TesteFacil.Testes.Interface.Compartilhado;
 using TesteFacil.Testes.Interface.ModuloDisciplina;
 
 namespace TesteFacil.Testes.Interface.ModuloMateria;
@@ -14,14 +12,14 @@ public sealed class MateriaInterfaceTests : TestFixture
     {
         // Arrange
         new DisciplinaIndexPageObject(driver!)
-           .IrPara(enderecoBase)
+           .IrPara(enderecoDriver)
            .ClickCadastrar()
            .PreencherNome("Matemática")
            .Confirmar();
 
         // Act
         var materiaIndex = new MateriaIndexPageObject(driver!)
-           .IrPara(enderecoBase);
+           .IrPara(enderecoDriver);
 
         materiaIndex
             .ClickCadastrar()
@@ -39,13 +37,13 @@ public sealed class MateriaInterfaceTests : TestFixture
     {
         // Arrange
         new DisciplinaIndexPageObject(driver!)
-           .IrPara(enderecoBase)
+           .IrPara(enderecoDriver)
            .ClickCadastrar()
            .PreencherNome("Matemática")
            .Confirmar();
 
         var materiaIndex = new MateriaIndexPageObject(driver!)
-            .IrPara(enderecoBase);
+            .IrPara(enderecoDriver);
 
         materiaIndex
             .ClickCadastrar()
@@ -71,13 +69,13 @@ public sealed class MateriaInterfaceTests : TestFixture
     {
         // Arrange
         new DisciplinaIndexPageObject(driver!)
-            .IrPara(enderecoBase)
+            .IrPara(enderecoDriver)
             .ClickCadastrar()
             .PreencherNome("Matemática")
             .Confirmar();
 
         var materiaIndex = new MateriaIndexPageObject(driver!)
-            .IrPara(enderecoBase);
+            .IrPara(enderecoDriver);
 
         materiaIndex
             .ClickCadastrar()

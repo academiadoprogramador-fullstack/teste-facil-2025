@@ -3,6 +3,7 @@ using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.Configuration;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Remote;
 using System.Diagnostics;
 using Testcontainers.PostgreSql;
 using TesteFacil.Infraestrutura.Orm.Compartilhado;
@@ -13,12 +14,16 @@ namespace TesteFacil.Testes.Interface.Compartilhado;
 public abstract class TestFixture
 {
     protected static IWebDriver? driver;
-    protected readonly static string enderecoBase = "https://localhost:7056";
+    protected readonly static string enderecoDriver = "http://host.docker.internal:5239";
 
     private static IConfiguration? configuracao;
+
     private static IDatabaseContainer? dbContainer;
-    private static TesteFacilDbContext? dbContext;
+    private static IContainer? seleniumContainer;
+
+    private TesteFacilDbContext? dbContext;
     private static Process? processoAplicacao;
+    private readonly static string enderecoInterno = "http://localhost:5239";
 
     [AssemblyInitialize]
     public static async Task ConfigurarTestes(TestContext _)
@@ -32,13 +37,13 @@ public abstract class TestFixture
 
         await InicializarAplicacaoAsync();
 
-        InicializarWebDriver();
+        await InicializarSeleniumAsync();
     }
 
     [AssemblyCleanup]
     public static async Task EncerrarTestes()
     {
-        EncerrarWebDriver();
+        await EncerrarSeleniumAsync();
 
         EncerrarAplicacao();
 
@@ -75,7 +80,7 @@ public abstract class TestFixture
             .WithUsername("postgres")
             .WithPassword("YourStrongPassword")
             .WithCleanUp(true)
-            .WithPortBinding(5432, true) // porta aleatória no host
+            .WithPortBinding(5432, true)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5432))
             .Build();
 
@@ -99,7 +104,7 @@ public abstract class TestFixture
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = "dotnet",
-                Arguments = "run --project ../../../../TesteFacil.WebApp --launch-profile \"https [Dev]\"",
+                Arguments = "run --project ../../../../TesteFacil.WebApp",
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -107,7 +112,7 @@ public abstract class TestFixture
 
             // Adiciona variáveis de ambiente específicas para o processo
             processStartInfo.Environment["ASPNETCORE_ENVIRONMENT"] = "Testing";
-            processStartInfo.Environment["ASPNETCORE_URLS"] = enderecoBase;
+            processStartInfo.Environment["ASPNETCORE_URLS"] = enderecoInterno;
             processStartInfo.Environment["SQL_CONNECTION_STRING"] = dbContainer?.GetConnectionString();
             processStartInfo.Environment["GEMINI_API_KEY"] = configuracao?["GEMINI_API_KEY"];
             processStartInfo.Environment["NEWRELIC_LICENSE_KEY"] = configuracao?["NEWRELIC_LICENSE_KEY"];
@@ -155,7 +160,7 @@ public abstract class TestFixture
         {
             try
             {
-                var res = await httpClient.GetAsync($"{enderecoBase}/health");
+                var res = await httpClient.GetAsync($"{enderecoInterno}/health");
 
                 if (res.IsSuccessStatusCode)
                     return;
@@ -190,76 +195,47 @@ public abstract class TestFixture
         }
     }
 
-    private static void InicializarWebDriver()
+    private static async Task InicializarSeleniumAsync()
     {
+        seleniumContainer = new ContainerBuilder()
+            .WithImage("selenium/standalone-chrome:nightly")
+            .WithName("teste-facil-selenium-e2e")
+            .WithPortBinding(4444, true)
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(4444))
+            .Build();
+
+        await seleniumContainer.StartAsync();
+
+        var seleniumUrl = $"http://{seleniumContainer.Hostname}:{seleniumContainer.GetMappedPublicPort(4444)}/wd/hub";
+
         var options = new ChromeOptions();
 
         options.AddArguments(
-            //"--headless",
-            "--ignore-certificate-errors",
-            "--disable-dev-shm-usage",                 // Superar limitações de recursos
-            "--disable-gpu",                           // Desabilitar GPU em headless,
-            "--disable-features=VizDisplayCompositor"  // Melhor compatibilidade
+            "--headless",
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--window-size=1920,1080"
         );
 
-        driver = new ChromeDriver(options);
-
-        Debug.WriteLine("Selenium WebDriver iniciado.");
+        driver = new RemoteWebDriver(new Uri(seleniumUrl), options);
     }
 
-    private static void EncerrarWebDriver()
+    private static async Task EncerrarSeleniumAsync()
     {
         try
         {
             driver?.Quit();
             driver?.Dispose();
 
-            Debug.WriteLine("Selenium WebDriver encerrado.");
+            if (seleniumContainer is not null)
+                await seleniumContainer.DisposeAsync();
+
+            Debug.WriteLine("Selenium encerrado.");
         }
         catch (Exception ex)
         {
-            Debug.WriteLine($"Erro ao encerrar Selenium WebDriver: {ex.Message}.");
+            Debug.WriteLine($"Erro ao encerrar Selenium: {ex.Message}.");
         }
     }
-
-    #region Selenium Testcontainer
-    //private static async Task InicializarSeleniumAsync()
-    //{
-    //    seleniumContainer = new ContainerBuilder()
-    //        .WithImage("selenium/standalone-chrome:nightly")
-    //        .WithName("teste-facil-selenium-e2e")
-    //        .WithPortBinding(4444, true) // porta aleatória no host
-    //        .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(4444))
-    //        .Build();
-
-    //    await seleniumContainer.StartAsync();
-
-    //    var seleniumHost = seleniumContainer.Hostname;
-    //    var mappedPort = seleniumContainer.GetMappedPublicPort(4444);
-    //    var seleniumUrl = $"http://{seleniumHost}:{mappedPort}/wd/hub";
-
-    //    var options = new ChromeOptions();
-    //    options.AddArguments("--headless", "--no-sandbox", "--disable-dev-shm-usage");
-
-    //    driver = new RemoteWebDriver(new Uri(seleniumUrl), options);
-    //}
-
-    //private static async Task EncerrarSeleniumAsync()
-    //{
-    //    try
-    //    {
-    //        driver?.Quit();
-    //        driver?.Dispose();
-
-    //        if (seleniumContainer is not null)
-    //            await seleniumContainer.DisposeAsync();
-
-    //        Debug.WriteLine("Selenium encerrado.");
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Debug.WriteLine($"Erro ao encerrar Selenium: {ex.Message}.");
-    //    }
-    //}
-    #endregion
 }

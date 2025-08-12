@@ -13,7 +13,7 @@ public sealed class DisciplinaInterfaceTests : TestFixture
     {
         // Arange
         var indexPageObject = new DisciplinaIndexPageObject(driver!)
-            .IrPara(enderecoBase);
+            .IrPara(enderecoDriver);
 
         // Act
         indexPageObject
@@ -30,7 +30,7 @@ public sealed class DisciplinaInterfaceTests : TestFixture
     {
         // Arrange
         var indexPageObject = new DisciplinaIndexPageObject(driver!)
-            .IrPara(enderecoBase);
+            .IrPara(enderecoDriver);
 
         indexPageObject
             .ClickCadastrar()
@@ -52,7 +52,7 @@ public sealed class DisciplinaInterfaceTests : TestFixture
     {
         // Arrange
         var indexPageObject = new DisciplinaIndexPageObject(driver!)
-            .IrPara(enderecoBase);
+            .IrPara(enderecoDriver);
 
         indexPageObject
             .ClickCadastrar()
