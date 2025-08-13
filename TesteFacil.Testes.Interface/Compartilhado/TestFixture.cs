@@ -201,6 +201,10 @@ public abstract class TestFixture
             .WithImage("selenium/standalone-chrome:nightly")
             .WithName("teste-facil-selenium-e2e")
             .WithPortBinding(4444, true)
+                .WithCreateParameterModifier(c =>
+                {
+                    c.HostConfig.ExtraHosts = new List<string> { "host.docker.internal:host-gateway" };
+                })
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(4444))
             .Build();
 
