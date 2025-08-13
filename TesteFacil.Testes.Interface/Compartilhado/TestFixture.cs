@@ -23,7 +23,7 @@ public abstract class TestFixture
 
     private TesteFacilDbContext? dbContext;
     private static Process? processoAplicacao;
-    private readonly static string enderecoInterno = "http://localhost:5239";
+    protected readonly static string enderecoBase = "http://localhost:5239";
 
     [AssemblyInitialize]
     public static async Task ConfigurarTestes(TestContext _)
@@ -33,11 +33,17 @@ public abstract class TestFixture
             .AddUserSecrets<TestFixture>()
             .Build();
 
-        await InicializarPostgreSqlAsync();
+        var network = new NetworkBuilder()
+            .WithName("teste-facil-network")
+            .Build();
+
+        await network.CreateAsync();
+
+        await InicializarPostgreSqlAsync(network);
 
         await InicializarAplicacaoAsync();
 
-        await InicializarSeleniumAsync();
+        await InicializarSeleniumAsync(network);
     }
 
     [AssemblyCleanup]
@@ -71,7 +77,7 @@ public abstract class TestFixture
         await dbContext.SaveChangesAsync();
     }
 
-    private static async Task InicializarPostgreSqlAsync()
+    private static async Task InicializarPostgreSqlAsync(DotNet.Testcontainers.Networks.INetwork network)
     {
         dbContainer = new PostgreSqlBuilder()
             .WithImage("postgres:16")
@@ -79,6 +85,8 @@ public abstract class TestFixture
             .WithDatabase("TesteFacilTestDb")
             .WithUsername("postgres")
             .WithPassword("YourStrongPassword")
+            .WithNetwork(network)
+            .WithNetworkAliases("db")
             .WithCleanUp(true)
             .WithPortBinding(5432, true)
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5432))
@@ -112,7 +120,7 @@ public abstract class TestFixture
 
             // Adiciona variáveis de ambiente específicas para o processo
             processStartInfo.Environment["ASPNETCORE_ENVIRONMENT"] = "Testing";
-            processStartInfo.Environment["ASPNETCORE_URLS"] = enderecoInterno;
+            processStartInfo.Environment["ASPNETCORE_URLS"] = "http://0.0.0.0:5239";
             processStartInfo.Environment["SQL_CONNECTION_STRING"] = dbContainer?.GetConnectionString();
             processStartInfo.Environment["GEMINI_API_KEY"] = configuracao?["GEMINI_API_KEY"];
             processStartInfo.Environment["NEWRELIC_LICENSE_KEY"] = configuracao?["NEWRELIC_LICENSE_KEY"];
@@ -160,7 +168,7 @@ public abstract class TestFixture
         {
             try
             {
-                var res = await httpClient.GetAsync($"{enderecoInterno}/health");
+                var res = await httpClient.GetAsync($"{enderecoBase}/health");
 
                 if (res.IsSuccessStatusCode)
                     return;
@@ -195,16 +203,15 @@ public abstract class TestFixture
         }
     }
 
-    private static async Task InicializarSeleniumAsync()
+    private static async Task InicializarSeleniumAsync(DotNet.Testcontainers.Networks.INetwork network)
     {
         seleniumContainer = new ContainerBuilder()
             .WithImage("selenium/standalone-chrome:nightly")
             .WithName("teste-facil-selenium-e2e")
+            .WithNetwork(network)
+            .WithNetworkAliases("selenium")
+            .WithExtraHost("host.docker.internal", "host-gateway")
             .WithPortBinding(4444, true)
-                .WithCreateParameterModifier(c =>
-                {
-                    c.HostConfig.ExtraHosts = new List<string> { "host.docker.internal:host-gateway" };
-                })
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(4444))
             .Build();
 
