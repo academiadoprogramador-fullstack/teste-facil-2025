@@ -61,6 +61,9 @@ public class MateriaFormPageObject
     {
         wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
 
+        //esperar carregar um elemento na página...
+        wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);
+
         return new MateriaIndexPageObject(driver);
     }
 }
