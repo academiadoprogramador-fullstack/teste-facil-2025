@@ -28,7 +28,7 @@ public class DisciplinaFormPageObject
 
     public DisciplinaIndexPageObject Confirmar()
     {
-        wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
+        wait.Until(d => d.FindElement(By.Id("btnConfirmar"))).Click();        
 
         return new DisciplinaIndexPageObject(driver!);
     }
