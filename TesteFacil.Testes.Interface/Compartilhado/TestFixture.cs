@@ -14,16 +14,15 @@ namespace TesteFacil.Testes.Interface.Compartilhado;
 public abstract class TestFixture
 {
     protected static IWebDriver? driver;
-    protected readonly static string enderecoDriver = "http://host.docker.internal:5239";
 
     private static IConfiguration? configuracao;
 
+    private static IContainer? appContainer;
     private static IDatabaseContainer? dbContainer;
     private static IContainer? seleniumContainer;
 
     private TesteFacilDbContext? dbContext;
-    private static Process? processoAplicacao;
-    protected readonly static string enderecoBase = "http://localhost:5239";
+    protected static string? enderecoBase;
 
     [AssemblyInitialize]
     public static async Task ConfigurarTestes(TestContext _)
@@ -34,14 +33,15 @@ public abstract class TestFixture
             .Build();
 
         var network = new NetworkBuilder()
-            .WithName("teste-facil-network")
+            .WithName(Guid.NewGuid().ToString("D"))
+            .WithCleanUp(true)
             .Build();
 
-        await network.CreateAsync();
+        await network.CreateAsync().ConfigureAwait(false);
 
         await InicializarPostgreSqlAsync(network);
 
-        await InicializarAplicacaoAsync();
+        await InicializarContainerAplicacaoAsync(network);
 
         await InicializarSeleniumAsync(network);
     }
@@ -51,7 +51,7 @@ public abstract class TestFixture
     {
         await EncerrarSeleniumAsync();
 
-        EncerrarAplicacao();
+        await EncerrarContainerAplicacaoAsync();
 
         await EncerrarPostgreSqlAsync();
     }
@@ -69,6 +69,8 @@ public abstract class TestFixture
 
     private static async Task ConfigurarTabelasAsync(TesteFacilDbContext dbContext)
     {
+        await dbContext.Database.EnsureCreatedAsync();
+
         dbContext.Testes.RemoveRange(dbContext.Testes);
         dbContext.Questoes.RemoveRange(dbContext.Questoes);
         dbContext.Materias.RemoveRange(dbContext.Materias);
@@ -104,103 +106,49 @@ public abstract class TestFixture
             await dbContainer.DisposeAsync();
     }
 
-    private static async Task InicializarAplicacaoAsync()
+    private static async Task InicializarContainerAplicacaoAsync(DotNet.Testcontainers.Networks.INetwork network)
     {
-        try
-        {
-            // Configura o processo que irá executar o projeto Web
-            var processStartInfo = new ProcessStartInfo
-            {
-                FileName = "dotnet",
-                Arguments = "run --project ../../../../TesteFacil.WebApp",
-                UseShellExecute = false,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-            };
+        var image = new ImageFromDockerfileBuilder()
+            .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), string.Empty)
+            .WithDockerfile("Dockerfile")
+            .WithBuildArgument("RESOURCE_REAPER_SESSION_ID", ResourceReaper.DefaultSessionId.ToString("D"))
+            .WithName("teste-facil-app-e2e:latest")
+            .Build();
 
-            // Adiciona variáveis de ambiente específicas para o processo
-            processStartInfo.Environment["ASPNETCORE_ENVIRONMENT"] = "Testing";
-            processStartInfo.Environment["ASPNETCORE_URLS"] = "http://0.0.0.0:5239";
-            processStartInfo.Environment["SQL_CONNECTION_STRING"] = dbContainer?.GetConnectionString();
-            processStartInfo.Environment["GEMINI_API_KEY"] = configuracao?["GEMINI_API_KEY"];
-            processStartInfo.Environment["NEWRELIC_LICENSE_KEY"] = configuracao?["NEWRELIC_LICENSE_KEY"];
-            
-            // Inicializa o processo da aplicação
-            processoAplicacao = Process.Start(processStartInfo);
+        await image.CreateAsync().ConfigureAwait(false);
 
-            if (processoAplicacao is null)
-                throw new InvalidOperationException("Não foi possível iniciar o processo da aplicação");
+        var networkConnectionString = dbContainer?.GetConnectionString()
+            .Replace(dbContainer.Hostname, "db")
+            .Replace(dbContainer.GetMappedPublicPort(5432).ToString(), "5432");
 
-            Debug.WriteLine($"Aplicação iniciada com PID: {processoAplicacao.Id}");
+        appContainer = new ContainerBuilder()
+            .WithImage(image)
+            .WithName("teste-facil-webapp")
+            .WithPortBinding(8080, true)
+            .WithNetwork(network)
+            .WithNetworkAliases("teste-facil-webapp")
+            .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Testing")
+            .WithEnvironment("SQL_CONNECTION_STRING", networkConnectionString)
+            .WithEnvironment("GEMINI_API_KEY", configuracao?["GEMINI_API_KEY"])
+            .WithEnvironment("NEWRELIC_LICENSE_KEY", configuracao?["NEWRELIC_LICENSE_KEY"])
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilPortIsAvailable(8080)
+                .UntilHttpRequestIsSucceeded(r => r.ForPort(8080).ForPath("/health"))
+            )
+            .WithCleanUp(true)
+            .Build();
 
-            // Conecta eventos de log do processo ao debug do teste
-            processoAplicacao.OutputDataReceived += (sender, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                    Debug.WriteLine(e.Data);
-            };
+        await appContainer.StartAsync();
 
-            processoAplicacao.ErrorDataReceived += (sender, e) =>
-            {
-                if (!string.IsNullOrEmpty(e.Data))
-                    Debug.WriteLine("ERR: " + e.Data);
-            };
+        Debug.WriteLine($"http://{appContainer.Hostname}:{appContainer.GetMappedPublicPort(8080)}");
 
-            processoAplicacao.BeginOutputReadLine();
-            processoAplicacao.BeginErrorReadLine();
-
-            await EsperarAplicacao();
-        }
-        catch (Exception ex)
-        {
-            throw new InvalidOperationException($"Erro ao iniciar a aplicação: {ex.Message}", ex);
-        }
+        enderecoBase = "http://teste-facil-webapp:8080";
     }
 
-    private static async Task EsperarAplicacao()
+    private static async Task EncerrarContainerAplicacaoAsync()
     {
-        using var httpClient = new HttpClient();
-
-        var inicio = DateTime.UtcNow;
-        var limite = TimeSpan.FromSeconds(30);
-
-        while (DateTime.UtcNow - inicio < limite)
-        {
-            try
-            {
-                var res = await httpClient.GetAsync($"{enderecoBase}/health");
-
-                if (res.IsSuccessStatusCode)
-                    return;
-            }
-            catch
-            {
-                // Ignora erros de conexão enquanto a app sobe
-            }
-
-            await Task.Delay(500);
-        }
-
-        throw new Exception("Aplicação não ficou pronta no tempo limite.");
-    }
-
-    private static void EncerrarAplicacao()
-    {
-        try
-        {
-            if (processoAplicacao is not null && !processoAplicacao.HasExited)
-            {
-                processoAplicacao.Kill();
-                processoAplicacao.WaitForExit(5000);
-                processoAplicacao.Dispose();
-
-                Debug.WriteLine("Processo da aplicação encerrado.");
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Erro ao encerrar aplicação: {ex.Message}.");
-        }
+        if (appContainer is not null)
+            await appContainer.DisposeAsync();
     }
 
     private static async Task InicializarSeleniumAsync(DotNet.Testcontainers.Networks.INetwork network)

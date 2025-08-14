@@ -1,6 +1,4 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
-using TesteFacil.Testes.Interface.Compartilhado;
+﻿using TesteFacil.Testes.Interface.Compartilhado;
 
 namespace TesteFacil.Testes.Interface.ModuloDisciplina;
 
@@ -13,7 +11,7 @@ public sealed class DisciplinaInterfaceTests : TestFixture
     {
         // Arange
         var indexPageObject = new DisciplinaIndexPageObject(driver!)
-            .IrPara(enderecoDriver);
+            .IrPara(enderecoBase!);
 
         // Act
         indexPageObject
@@ -30,7 +28,7 @@ public sealed class DisciplinaInterfaceTests : TestFixture
     {
         // Arrange
         var indexPageObject = new DisciplinaIndexPageObject(driver!)
-            .IrPara(enderecoDriver);
+            .IrPara(enderecoBase!);
 
         indexPageObject
             .ClickCadastrar()
@@ -52,7 +50,7 @@ public sealed class DisciplinaInterfaceTests : TestFixture
     {
         // Arrange
         var indexPageObject = new DisciplinaIndexPageObject(driver!)
-            .IrPara(enderecoDriver);
+            .IrPara(enderecoBase!);
 
         indexPageObject
             .ClickCadastrar()
