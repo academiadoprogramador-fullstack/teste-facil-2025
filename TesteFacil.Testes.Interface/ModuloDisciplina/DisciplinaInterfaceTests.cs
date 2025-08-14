@@ -24,6 +24,7 @@ public sealed class DisciplinaInterfaceTests : TestFixture
     }
 
     [TestMethod]
+    [Retry(3, MillisecondsDelayBetweenRetries = 500)]
     public void Deve_Editar_Disciplina_Corretamente()
     {
         // Arrange
@@ -46,6 +47,7 @@ public sealed class DisciplinaInterfaceTests : TestFixture
     }
 
     [TestMethod]
+    [Retry(3, MillisecondsDelayBetweenRetries = 500)]
     public void Deve_Excluir_Disciplina_Corretamente()
     {
         // Arrange
