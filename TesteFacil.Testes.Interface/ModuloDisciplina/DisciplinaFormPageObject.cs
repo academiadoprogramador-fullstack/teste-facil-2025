@@ -12,22 +12,26 @@ public class DisciplinaFormPageObject
     {
         this.driver = driver;
 
-        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+
         wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
     }
 
     public DisciplinaFormPageObject PreencherNome(string nome)
     {
-        var nomeInput = driver.FindElement(By.Id("Nome"));
-        nomeInput.Clear();
-        nomeInput.SendKeys(nome);
+        var inputNome = driver?.FindElement(By.Id("Nome"));
+        inputNome?.Clear();
+        inputNome?.SendKeys(nome);
+
         return this;
     }
 
     public DisciplinaIndexPageObject Confirmar()
     {
-        driver.FindElement(By.CssSelector("button[type='submit']")).Click();
+        wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
 
-        return new DisciplinaIndexPageObject(driver);
+        wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);
+
+        return new DisciplinaIndexPageObject(driver!);
     }
 }

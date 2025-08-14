@@ -11,47 +11,39 @@ public class DisciplinaIndexPageObject
     public DisciplinaIndexPageObject(IWebDriver driver)
     {
         this.driver = driver;
-        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+
+        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
     }
 
-    public DisciplinaIndexPageObject IrPara(string baseUrl)
+    public DisciplinaIndexPageObject IrPara(string enderecoBase)
     {
-        driver.Navigate().GoToUrl(Path.Combine(baseUrl, "disciplinas"));
+        driver.Navigate().GoToUrl(Path.Combine(enderecoBase, "disciplinas"));
 
         return this;
     }
-
     public DisciplinaFormPageObject ClickCadastrar()
     {
-        driver.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Click();
+        wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']"))).Click();
 
-        return new DisciplinaFormPageObject(driver);
+        return new DisciplinaFormPageObject(driver!);
     }
 
     public DisciplinaFormPageObject ClickEditar()
     {
-        wait.Until(d =>d.FindElement(By.CssSelector(".card a[title='Edição']"))).Click();
+        wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Edição']"))).Click();
 
-        return new DisciplinaFormPageObject(driver);
+        return new DisciplinaFormPageObject(driver!);
     }
 
-    public DisciplinaIndexPageObject ClickExcluir()
+    public DisciplinaFormPageObject ClickExcluir()
     {
         wait.Until(d => d.FindElement(By.CssSelector(".card a[title='Exclusão']"))).Click();
 
-        return this;
+        return new DisciplinaFormPageObject(driver!);
     }
 
-    public DisciplinaIndexPageObject ConfirmarExclusao()
+    public bool ContemDisciplina(string nome)
     {
-        wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
-
-        return this;
+        return driver.PageSource.Contains(nome);
     }
-
-    public bool ContemDisciplina(string nome) =>
-        driver.PageSource.Contains(nome);
-
-    public int ContarDisciplinas() =>
-        driver.FindElements(By.CssSelector(".card")).Count;
 }

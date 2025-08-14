@@ -12,20 +12,21 @@ public class MateriaFormPageObject
     {
         this.driver = driver;
 
-        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+        wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+
         wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
     }
 
     public MateriaFormPageObject PreencherNome(string nome)
     {
-        wait.Until(d => 
+        wait.Until(d =>
             d.FindElement(By.Id("Nome")).Displayed &&
             d.FindElement(By.Id("Nome")).Enabled
         );
 
-        var nomeInput = driver.FindElement(By.Id("Nome"));
-        nomeInput.Clear();
-        nomeInput.SendKeys(nome);
+        var inputNome = driver.FindElement(By.Id("Nome"));
+        inputNome.Clear();
+        inputNome.SendKeys(nome);
 
         return this;
     }
@@ -58,7 +59,9 @@ public class MateriaFormPageObject
 
     public MateriaIndexPageObject Confirmar()
     {
-        driver.FindElement(By.CssSelector("button[type='submit']")).Click();
+        wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
+
+        wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);
 
         return new MateriaIndexPageObject(driver);
     }
