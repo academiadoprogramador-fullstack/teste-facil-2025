@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Remote;
-using System.Diagnostics;
 using Testcontainers.PostgreSql;
 using TesteFacil.Infraestrutura.Orm.Compartilhado;
 
@@ -14,15 +13,14 @@ namespace TesteFacil.Testes.Interface.Compartilhado;
 public abstract class TestFixture
 {
     protected static IWebDriver? driver;
-
-    private static IConfiguration? configuracao;
+    protected static string? enderecoBase;
 
     private static IContainer? appContainer;
     private static IDatabaseContainer? dbContainer;
     private static IContainer? seleniumContainer;
 
+    private static IConfiguration? configuracao;
     private TesteFacilDbContext? dbContext;
-    protected static string? enderecoBase;
 
     [AssemblyInitialize]
     public static async Task ConfigurarTestes(TestContext _)
@@ -32,18 +30,18 @@ public abstract class TestFixture
             .AddUserSecrets<TestFixture>()
             .Build();
 
-        var network = new NetworkBuilder()
+        var rede = new NetworkBuilder()
             .WithName(Guid.NewGuid().ToString("D"))
             .WithCleanUp(true)
             .Build();
 
-        await network.CreateAsync().ConfigureAwait(false);
+        await rede.CreateAsync().ConfigureAwait(false);
 
-        await InicializarPostgreSqlAsync(network);
+        await InicializarPostgreSqlAsync(rede);
 
-        await InicializarContainerAplicacaoAsync(network);
+        await InicializarAplicacaoAsync(rede);
 
-        await InicializarSeleniumAsync(network);
+        await InicializarSeleniumAsync(rede);
     }
 
     [AssemblyCleanup]
@@ -51,7 +49,7 @@ public abstract class TestFixture
     {
         await EncerrarSeleniumAsync();
 
-        await EncerrarContainerAplicacaoAsync();
+        await EncerrarAplicacaoAsync();
 
         await EncerrarPostgreSqlAsync();
     }
@@ -100,7 +98,7 @@ public abstract class TestFixture
         await dbContainer.StartAsync();
     }
 
-    private static async Task InicializarContainerAplicacaoAsync(DotNet.Testcontainers.Networks.INetwork network)
+    private static async Task InicializarAplicacaoAsync(DotNet.Testcontainers.Networks.INetwork network)
     {
         // Configura a imagem à partir do Dockerfile
         var image = new ImageFromDockerfileBuilder()
@@ -176,7 +174,7 @@ public abstract class TestFixture
             await dbContainer.DisposeAsync();
     }
 
-    private static async Task EncerrarContainerAplicacaoAsync()
+    private static async Task EncerrarAplicacaoAsync()
     {
         if (appContainer is not null)
             await appContainer.DisposeAsync();
