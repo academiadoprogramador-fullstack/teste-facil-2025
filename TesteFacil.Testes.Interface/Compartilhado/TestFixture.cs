@@ -81,33 +81,28 @@ public abstract class TestFixture
 
     private static async Task InicializarPostgreSqlAsync(DotNet.Testcontainers.Networks.INetwork network)
     {
+        // Configura e inicializa o container do banco de dados
         dbContainer = new PostgreSqlBuilder()
             .WithImage("postgres:16")
+            .WithPortBinding(5432, true)
             .WithName("teste-facil-e2e-testdb")
             .WithDatabase("TesteFacilTestDb")
             .WithUsername("postgres")
             .WithPassword("YourStrongPassword")
             .WithNetwork(network)
-            .WithNetworkAliases("db")
+            .WithNetworkAliases("teste-facil-e2e-testdb")
             .WithCleanUp(true)
-            .WithPortBinding(5432, true)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5432))
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilPortIsAvailable(5432)
+            )
             .Build();
 
         await dbContainer.StartAsync();
-
-        Debug.WriteLine($"PostgreSQL Container iniciado na porta: {dbContainer.GetMappedPublicPort(5432)}");
-        Debug.WriteLine($"Connection String: {dbContainer.GetConnectionString()}");
-    }
-
-    private static async Task EncerrarPostgreSqlAsync()
-    {
-        if (dbContainer != null)
-            await dbContainer.DisposeAsync();
     }
 
     private static async Task InicializarContainerAplicacaoAsync(DotNet.Testcontainers.Networks.INetwork network)
     {
+        // Configura a imagem à partir do Dockerfile
         var image = new ImageFromDockerfileBuilder()
             .WithDockerfileDirectory(CommonDirectoryPath.GetSolutionDirectory(), string.Empty)
             .WithDockerfile("Dockerfile")
@@ -117,14 +112,16 @@ public abstract class TestFixture
 
         await image.CreateAsync().ConfigureAwait(false);
 
+        // Configura a connection string para o network
         var networkConnectionString = dbContainer?.GetConnectionString()
-            .Replace(dbContainer.Hostname, "db")
+            .Replace(dbContainer.Hostname, "teste-facil-e2e-testdb")
             .Replace(dbContainer.GetMappedPublicPort(5432).ToString(), "5432");
 
+        // Configura o container da aplicação e inicializa o enderecoBase
         appContainer = new ContainerBuilder()
             .WithImage(image)
-            .WithName("teste-facil-webapp")
             .WithPortBinding(8080, true)
+            .WithName("teste-facil-webapp")
             .WithNetwork(network)
             .WithNetworkAliases("teste-facil-webapp")
             .WithEnvironment("ASPNETCORE_ENVIRONMENT", "Testing")
@@ -140,9 +137,43 @@ public abstract class TestFixture
 
         await appContainer.StartAsync();
 
-        Debug.WriteLine($"http://{appContainer.Hostname}:{appContainer.GetMappedPublicPort(8080)}");
+        enderecoBase = $"http://{appContainer.Name}:8080";
+    }
 
-        enderecoBase = "http://teste-facil-webapp:8080";
+    private static async Task InicializarSeleniumAsync(DotNet.Testcontainers.Networks.INetwork network)
+    {
+        // Configura o container do selenium e o navegador chrome remoto
+        seleniumContainer = new ContainerBuilder()
+            .WithImage("selenium/standalone-chrome:nightly")
+            .WithPortBinding(4444, true)
+            .WithName("teste-facil-selenium-e2e")
+            .WithNetwork(network)
+            .WithNetworkAliases("teste-facil-selenium-e2e")
+            .WithExtraHost("host.docker.internal", "host-gateway")
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(4444))
+            .Build();
+
+        await seleniumContainer.StartAsync();
+
+        var enderecoSelenium = $"http://{seleniumContainer.Hostname}:{seleniumContainer.GetMappedPublicPort(4444)}/wd/hub";
+
+        var options = new ChromeOptions();
+
+        options.AddArguments(
+            "--headless=new",
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--window-size=1920,1080"
+        );
+
+        driver = new RemoteWebDriver(new Uri(enderecoSelenium), options);
+    }
+
+    private static async Task EncerrarPostgreSqlAsync()
+    {
+        if (dbContainer is not null)
+            await dbContainer.DisposeAsync();
     }
 
     private static async Task EncerrarContainerAplicacaoAsync()
@@ -151,50 +182,12 @@ public abstract class TestFixture
             await appContainer.DisposeAsync();
     }
 
-    private static async Task InicializarSeleniumAsync(DotNet.Testcontainers.Networks.INetwork network)
-    {
-        seleniumContainer = new ContainerBuilder()
-            .WithImage("selenium/standalone-chrome:nightly")
-            .WithName("teste-facil-selenium-e2e")
-            .WithNetwork(network)
-            .WithNetworkAliases("selenium")
-            .WithExtraHost("host.docker.internal", "host-gateway")
-            .WithPortBinding(4444, true)
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(4444))
-            .Build();
-
-        await seleniumContainer.StartAsync();
-
-        var seleniumUrl = $"http://{seleniumContainer.Hostname}:{seleniumContainer.GetMappedPublicPort(4444)}/wd/hub";
-
-        var options = new ChromeOptions();
-
-        options.AddArguments(
-            "--headless",
-            "--no-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-gpu",
-            "--window-size=1920,1080"
-        );
-
-        driver = new RemoteWebDriver(new Uri(seleniumUrl), options);
-    }
-
     private static async Task EncerrarSeleniumAsync()
     {
-        try
-        {
-            driver?.Quit();
-            driver?.Dispose();
+        driver?.Quit();
+        driver?.Dispose();
 
-            if (seleniumContainer is not null)
-                await seleniumContainer.DisposeAsync();
-
-            Debug.WriteLine("Selenium encerrado.");
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Erro ao encerrar Selenium: {ex.Message}.");
-        }
+        if (seleniumContainer is not null)
+            await seleniumContainer.DisposeAsync();
     }
 }
