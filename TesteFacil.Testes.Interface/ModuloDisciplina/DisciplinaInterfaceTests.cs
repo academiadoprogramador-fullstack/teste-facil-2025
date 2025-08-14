@@ -21,7 +21,7 @@ public sealed class DisciplinaInterfaceTests : TestFixture
             .Confirmar();
 
         // Assert
-        Assert.AreEqual(1, indexPageObject.ContarDisciplinas());
+        Assert.IsTrue(indexPageObject.ContemDisciplina("Matemática"));
     }
 
     [TestMethod]
@@ -63,7 +63,7 @@ public sealed class DisciplinaInterfaceTests : TestFixture
         // Act
         indexPageObject
             .ClickExcluir()
-            .ConfirmarExclusao();
+            .Confirmar();
 
         // Assert
         Assert.IsFalse(indexPageObject.ContemDisciplina("Matemática"));
