@@ -8,7 +8,6 @@ namespace TesteFacil.Testes.Interface.ModuloMateria;
 public sealed class MateriaInterfaceTests : TestFixture
 {
     [TestMethod]
-    [Retry(3, MillisecondsDelayBetweenRetries = 500)]
     public void Deve_Cadastrar_Materia_Corretamente()
     {
         // Arrange
@@ -34,7 +33,6 @@ public sealed class MateriaInterfaceTests : TestFixture
     }
 
     [TestMethod]
-    [Retry(3, MillisecondsDelayBetweenRetries = 500)]
     public void Deve_Editar_Materia_Corretamente()
     {
         // Arrange
@@ -67,7 +65,6 @@ public sealed class MateriaInterfaceTests : TestFixture
     }
 
     [TestMethod]
-    [Retry(3, MillisecondsDelayBetweenRetries = 500)]
     public void Deve_Excluir_Materia_Corretamente()
     {
         // Arrange

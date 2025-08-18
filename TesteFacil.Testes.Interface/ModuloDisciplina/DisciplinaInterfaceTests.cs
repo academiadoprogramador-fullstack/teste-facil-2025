@@ -7,7 +7,6 @@ namespace TesteFacil.Testes.Interface.ModuloDisciplina;
 public sealed class DisciplinaInterfaceTests : TestFixture
 {
     [TestMethod]
-    [Retry(3, MillisecondsDelayBetweenRetries = 500)]
     public void Deve_Cadastrar_Disciplina_Corretamente()
     {
         // Arange
@@ -25,7 +24,6 @@ public sealed class DisciplinaInterfaceTests : TestFixture
     }
 
     [TestMethod]
-    [Retry(3, MillisecondsDelayBetweenRetries = 500)]
     public void Deve_Editar_Disciplina_Corretamente()
     {
         // Arrange
@@ -48,7 +46,6 @@ public sealed class DisciplinaInterfaceTests : TestFixture
     }
 
     [TestMethod]
-    [Retry(3, MillisecondsDelayBetweenRetries = 500)]
     public void Deve_Excluir_Disciplina_Corretamente()
     {
         // Arrange
