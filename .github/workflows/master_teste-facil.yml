@@ -49,6 +49,11 @@ jobs:
     
       - name: Run tests
         run: dotnet test --configuration Release --verbosity normal
+        env:
+          ASPNET_ENVIRONMENT: "GITHUB_ACTIONS"
+          SQL_CONNECTION_STRING: ${{ secrets.SQL_CONNECTION_STRING }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NEWRELIC_LICENSE_KEY: ${{ secrets.NEWRELIC_LICENSE_KEY }}
 
   migrate:
     runs-on: windows-latest
