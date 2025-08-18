@@ -44,6 +44,8 @@ public class DisciplinaIndexPageObject
 
     public bool ContemDisciplina(string nome)
     {
+        wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);
+
         return driver.PageSource.Contains(nome);
     }
 }
