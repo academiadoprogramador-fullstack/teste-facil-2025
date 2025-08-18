@@ -33,6 +33,18 @@ public abstract class TestFixture
         ConfigurarTabelas(dbContext);
     }
 
+    private static void ConfigurarTabelas(TesteFacilDbContext dbContext)
+    {
+        dbContext.Database.EnsureCreated();
+
+        dbContext.Testes.RemoveRange(dbContext.Testes);
+        dbContext.Questoes.RemoveRange(dbContext.Questoes);
+        dbContext.Materias.RemoveRange(dbContext.Materias);
+        dbContext.Disciplinas.RemoveRange(dbContext.Disciplinas);
+
+        dbContext.SaveChanges();
+    }
+
     private static void InicializarWebDriver()
     {
         var options = new ChromeOptions();
@@ -45,17 +57,5 @@ public abstract class TestFixture
     {
         driver?.Quit();
         driver?.Dispose();
-    }
-
-    private static void ConfigurarTabelas(TesteFacilDbContext dbContext)
-    {
-        dbContext.Database.EnsureCreated();
-
-        dbContext.Testes.RemoveRange(dbContext.Testes);
-        dbContext.Questoes.RemoveRange(dbContext.Questoes);
-        dbContext.Materias.RemoveRange(dbContext.Materias);
-        dbContext.Disciplinas.RemoveRange(dbContext.Disciplinas);
-
-        dbContext.SaveChanges();
     }
 }
