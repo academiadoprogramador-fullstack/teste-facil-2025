@@ -10,29 +10,33 @@ public abstract class TestFixture
     protected static IWebDriver? driver;
     protected static TesteFacilDbContext? dbContext;
 
-    protected static string enderecoBase = "https://localhost:7056";
-    private static string connectionString = "Host=localhost;Port=5432;Database=TesteFacilDb;Username=postgres;Password=YourStrongPassword";
+    protected readonly static string enderecoBase = "https://localhost:7056";
+    private readonly static string connectionString = "Host=localhost;Port=5432;Database=TesteFacilDb;Username=postgres;Password=YourStrongPassword";
+
+    [AssemblyInitialize]
+    public static void ConfigurarTestes(TestContext _)
+    {
+        InicializarWebDriver();
+    }
+
+    [AssemblyCleanup]
+    public static void EncerrarTestes()
+    {
+        EncerrarWebDriver();
+    }
 
     [TestInitialize]
-    public void ConfigurarTestes()
+    public void InicializarTeste()
     {
         dbContext = TesteFacilDbContextFactory.CriarDbContext(connectionString);
 
         ConfigurarTabelas(dbContext);
-
-        InicializarWebDriver();
-    }
-
-    [TestCleanup]
-    public void EncerrarTestes()
-    {
-        EncerrarWebDriver();
     }
 
     private static void InicializarWebDriver()
     {
         var options = new ChromeOptions();
-        options.AddArgument("--headless");
+        options.AddArgument("--headless=new");
 
         driver = new ChromeDriver(options);
     }

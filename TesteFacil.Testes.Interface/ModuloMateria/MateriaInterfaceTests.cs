@@ -1,6 +1,4 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
-using TesteFacil.Testes.Interface.Compartilhado;
+﻿using TesteFacil.Testes.Interface.Compartilhado;
 using TesteFacil.Testes.Interface.ModuloDisciplina;
 
 namespace TesteFacil.Testes.Interface.ModuloMateria;

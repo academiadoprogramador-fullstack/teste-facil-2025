@@ -1,6 +1,4 @@
-﻿using OpenQA.Selenium;
-using OpenQA.Selenium.Support.UI;
-using TesteFacil.Testes.Interface.Compartilhado;
+﻿using TesteFacil.Testes.Interface.Compartilhado;
 
 namespace TesteFacil.Testes.Interface.ModuloDisciplina;
 
@@ -11,62 +9,60 @@ public sealed class DisciplinaInterfaceTests : TestFixture
     [TestMethod]
     public void Deve_Cadastrar_Disciplina_Corretamente()
     {
-        // Arrange
-        var disciplinaIndex = new DisciplinaIndexPageObject(driver!);
-
-        disciplinaIndex
-            .IrPara(enderecoBase);
+        // Arange
+        var indexPageObject = new DisciplinaIndexPageObject(driver!)
+            .IrPara(enderecoBase!);
 
         // Act
-        disciplinaIndex
+        indexPageObject
             .ClickCadastrar()
             .PreencherNome("Matemática")
             .Confirmar();
 
         // Assert
-        Assert.IsTrue(disciplinaIndex.ContemDisciplina("Matemática"));
+        Assert.IsTrue(indexPageObject.ContemDisciplina("Matemática"));
     }
 
     [TestMethod]
     public void Deve_Editar_Disciplina_Corretamente()
     {
         // Arrange
-        var disciplinaIndex = new DisciplinaIndexPageObject(driver!);
+        var indexPageObject = new DisciplinaIndexPageObject(driver!)
+            .IrPara(enderecoBase!);
 
-        disciplinaIndex
-            .IrPara(enderecoBase)
+        indexPageObject
             .ClickCadastrar()
             .PreencherNome("Matemática")
             .Confirmar();
 
         // Act
-        disciplinaIndex
+        indexPageObject
             .ClickEditar()
             .PreencherNome("Matemática Editada")
             .Confirmar();
 
         // Assert
-        Assert.IsTrue(disciplinaIndex.ContemDisciplina("Matemática Editada"));
+        Assert.IsTrue(indexPageObject.ContemDisciplina("Matemática Editada"));
     }
 
     [TestMethod]
     public void Deve_Excluir_Disciplina_Corretamente()
     {
         // Arrange
-        var disciplinaIndex = new DisciplinaIndexPageObject(driver!);
+        var indexPageObject = new DisciplinaIndexPageObject(driver!)
+            .IrPara(enderecoBase!);
 
-        disciplinaIndex
-            .IrPara(enderecoBase)
+        indexPageObject
             .ClickCadastrar()
             .PreencherNome("Matemática")
             .Confirmar();
 
         // Act
-        disciplinaIndex
+        indexPageObject
             .ClickExcluir()
             .Confirmar();
 
         // Assert
-        Assert.IsFalse(disciplinaIndex.ContemDisciplina("Matemática"));
+        Assert.IsFalse(indexPageObject.ContemDisciplina("Matemática"));
     }
 }

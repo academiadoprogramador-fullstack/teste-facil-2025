@@ -11,7 +11,7 @@ public class DisciplinaFormPageObject
     public DisciplinaFormPageObject(IWebDriver driver)
     {
         this.driver = driver;
-        
+
         wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
 
         wait.Until(d => d.FindElement(By.CssSelector("form")).Displayed);
@@ -29,6 +29,8 @@ public class DisciplinaFormPageObject
     public DisciplinaIndexPageObject Confirmar()
     {
         wait.Until(d => d.FindElement(By.CssSelector("button[type='submit']"))).Click();
+
+        wait.Until(d => d.FindElement(By.CssSelector("a[data-se='btnCadastrar']")).Displayed);
 
         return new DisciplinaIndexPageObject(driver!);
     }
