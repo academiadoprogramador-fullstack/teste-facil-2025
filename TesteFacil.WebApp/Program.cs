@@ -6,6 +6,7 @@ using TesteFacil.Dominio.ModuloDisciplina;
 using TesteFacil.Dominio.ModuloMateria;
 using TesteFacil.Dominio.ModuloQuestao;
 using TesteFacil.Dominio.ModuloTeste;
+using TesteFacil.Infraestrutura.Orm.Compartilhado;
 using TesteFacil.Infraestrutura.Orm.ModuloDisciplina;
 using TesteFacil.Infraestrutura.Orm.ModuloMateria;
 using TesteFacil.Infraestrutura.Orm.ModuloQuestao;
@@ -36,6 +37,9 @@ public class Program
         builder.Services.AddQuestPDFConfig();
         builder.Services.AddGeminiChatConfig(builder.Configuration);
 
+        builder.Services.AddHealthChecks()
+            .AddDbContextCheck<TesteFacilDbContext>();
+
         builder.Services.AddControllersWithViews(options =>
         {
             options.Filters.Add<ValidarModeloAttribute>();
@@ -57,6 +61,8 @@ public class Program
         app.UseAntiforgery();
         app.UseStaticFiles();
         app.UseRouting();
+
+        app.MapHealthChecks("/health");
 
         app.MapDefaultControllerRoute();
 
