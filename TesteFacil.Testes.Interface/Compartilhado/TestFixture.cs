@@ -16,8 +16,13 @@ public abstract class TestFixture
     protected static string? enderecoBase;
 
     private static IContainer? appContainer;
+    private static readonly int appPort = 8080;
+
     private static IDatabaseContainer? dbContainer;
+    private static readonly int dbPort = 5432;
+
     private static IContainer? seleniumContainer;
+    private static readonly int seleniumPort = 4444;
 
     private static IConfiguration? configuracao;
     private TesteFacilDbContext? dbContext;
@@ -82,7 +87,7 @@ public abstract class TestFixture
         // Configura e inicializa o container do banco de dados
         dbContainer = new PostgreSqlBuilder()
             .WithImage("postgres:16")
-            .WithPortBinding(5432, true)
+            .WithPortBinding(dbPort, true)
             .WithName("teste-facil-e2e-testdb")
             .WithDatabase("TesteFacilTestDb")
             .WithUsername("postgres")
@@ -91,7 +96,7 @@ public abstract class TestFixture
             .WithNetworkAliases("teste-facil-e2e-testdb")
             .WithCleanUp(true)
             .WithWaitStrategy(Wait.ForUnixContainer()
-                .UntilPortIsAvailable(5432)
+                .UntilPortIsAvailable(dbPort)
             )
             .Build();
 
@@ -113,12 +118,12 @@ public abstract class TestFixture
         // Configura a connection string para o network
         var networkConnectionString = dbContainer?.GetConnectionString()
             .Replace(dbContainer.Hostname, "teste-facil-e2e-testdb")
-            .Replace(dbContainer.GetMappedPublicPort(5432).ToString(), "5432");
+            .Replace(dbContainer.GetMappedPublicPort(dbPort).ToString(), "5432");
 
         // Configura o container da aplicação e inicializa o enderecoBase
         appContainer = new ContainerBuilder()
             .WithImage(image)
-            .WithPortBinding(8080, true)
+            .WithPortBinding(appPort, true)
             .WithName("teste-facil-webapp")
             .WithNetwork(network)
             .WithNetworkAliases("teste-facil-webapp")
@@ -127,15 +132,15 @@ public abstract class TestFixture
             .WithEnvironment("GEMINI_API_KEY", configuracao?["GEMINI_API_KEY"])
             .WithEnvironment("NEWRELIC_LICENSE_KEY", configuracao?["NEWRELIC_LICENSE_KEY"])
             .WithWaitStrategy(Wait.ForUnixContainer()
-                .UntilPortIsAvailable(8080)
-                .UntilHttpRequestIsSucceeded(r => r.ForPort(8080).ForPath("/health"))
+                .UntilPortIsAvailable(appPort)
+                .UntilHttpRequestIsSucceeded(r => r.ForPort((ushort)appPort).ForPath("/health"))
             )
             .WithCleanUp(true)
             .Build();
 
         await appContainer.StartAsync();
 
-        enderecoBase = $"http://{appContainer.Name}:8080";
+        enderecoBase = $"http://{appContainer.Name}:{appPort}";
     }
 
     private static async Task InicializarSeleniumAsync(DotNet.Testcontainers.Networks.INetwork network)
@@ -143,17 +148,19 @@ public abstract class TestFixture
         // Configura o container do selenium e o navegador chrome remoto
         seleniumContainer = new ContainerBuilder()
             .WithImage("selenium/standalone-chrome:nightly")
-            .WithPortBinding(4444, true)
+            .WithPortBinding(seleniumPort, true)
             .WithName("teste-facil-selenium-e2e")
             .WithNetwork(network)
             .WithNetworkAliases("teste-facil-selenium-e2e")
             .WithExtraHost("host.docker.internal", "host-gateway")
-            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(4444))
+            .WithWaitStrategy(Wait.ForUnixContainer()
+                .UntilPortIsAvailable(seleniumPort)
+            )
             .Build();
 
         await seleniumContainer.StartAsync();
 
-        var enderecoSelenium = $"http://{seleniumContainer.Hostname}:{seleniumContainer.GetMappedPublicPort(4444)}/wd/hub";
+        var enderecoSelenium = $"http://{seleniumContainer.Hostname}:{seleniumContainer.GetMappedPublicPort(seleniumPort)}/wd/hub";
 
         var options = new ChromeOptions();
 
