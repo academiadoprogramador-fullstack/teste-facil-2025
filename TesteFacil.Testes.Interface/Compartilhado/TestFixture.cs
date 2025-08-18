@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Remote;
-using System.Threading.Tasks;
 using Testcontainers.PostgreSql;
 using TesteFacil.Infraestrutura.Orm.Compartilhado;
 
@@ -14,8 +13,10 @@ namespace TesteFacil.Testes.Interface.Compartilhado;
 public abstract class TestFixture
 {
     protected static IWebDriver? driver;
-    protected static TesteFacilDbContext? dbContext;
     protected static string? enderecoBase;
+
+    private static IConfiguration? configuracao;
+    private static DotNet.Testcontainers.Networks.INetwork? rede;
 
     private static IDatabaseContainer? dbContainer;
     private readonly static int dbPort = 5432;
@@ -26,7 +27,7 @@ public abstract class TestFixture
     private static IContainer? seleniumContainer;
     private readonly static int seleniumPort = 4444;
 
-    private static IConfiguration? configuracao;
+    private static TesteFacilDbContext? dbContext;
 
     [AssemblyInitialize]
     public static async Task ConfigurarTestes(TestContext _)
@@ -36,16 +37,16 @@ public abstract class TestFixture
             .AddEnvironmentVariables()
             .Build();
 
-        var rede = new NetworkBuilder()
+        rede = new NetworkBuilder()
             .WithName(Guid.NewGuid().ToString("D"))
             .WithCleanUp(true)
             .Build();
 
-        await InicializarBancoDadosAsync(rede);
+        await InicializarBancoDadosAsync();
 
-        await InicializarAplicacaoAsync(rede);
+        await InicializarAplicacaoAsync();
 
-        await InicializarWebDriverAsync(rede);
+        await InicializarWebDriverAsync();
     }
 
     [AssemblyCleanup]
@@ -81,7 +82,7 @@ public abstract class TestFixture
         dbContext.SaveChanges();
     }
 
-    private static async Task InicializarBancoDadosAsync(DotNet.Testcontainers.Networks.INetwork rede)
+    private static async Task InicializarBancoDadosAsync()
     {
         dbContainer = new PostgreSqlBuilder()
           .WithImage("postgres:16")
@@ -102,7 +103,7 @@ public abstract class TestFixture
 
     }
 
-    private static async Task InicializarAplicacaoAsync(DotNet.Testcontainers.Networks.INetwork rede)
+    private static async Task InicializarAplicacaoAsync()
     {
         // Configura a imagem à partir do Dockerfile
         var imagem = new ImageFromDockerfileBuilder()
@@ -114,11 +115,11 @@ public abstract class TestFixture
 
         await imagem.CreateAsync().ConfigureAwait(false);
 
-        // Configura a connection string para o network
-        // dbContainer.GetConnectionString() = "Host=teste-facil-e2e-testdb;Port=5432;Database=TesteFacilDb;Username=postgres;Password=YourStrongPassword";
+        // Configura a connection string para a rede:
+        // "Host=teste-facil-e2e-testdb;Port=5432;Database=TesteFacilDb;Username=postgres;Password=YourStrongPassword"
         var connectionStringRede = dbContainer?.GetConnectionString()
             .Replace(dbContainer.Hostname, "teste-facil-e2e-testdb")
-            .Replace(dbContainer.GetMappedPublicPort(dbPort).ToString(), "5432");
+            .Replace(dbContainer.GetMappedPublicPort(dbPort).ToString(), dbPort.ToString());
 
         // Configura o container da aplicação e inicializa o enderecoBase
         appContainer = new ContainerBuilder()
@@ -139,11 +140,11 @@ public abstract class TestFixture
 
         await appContainer.StartAsync();
 
-        // http://teste-facil-webapp:8080
+        // URL interno: http://teste-facil-webapp:8080
         enderecoBase = $"http://{appContainer.Name}:{appPort}";
     }
 
-    private static async Task InicializarWebDriverAsync(DotNet.Testcontainers.Networks.INetwork rede)
+    private static async Task InicializarWebDriverAsync()
     {
         seleniumContainer = new ContainerBuilder()
             .WithImage("selenium/standalone-chrome:nightly")
@@ -162,7 +163,7 @@ public abstract class TestFixture
         var enderecoSelenium = new Uri($"http://{seleniumContainer.Hostname}:{seleniumContainer.GetMappedPublicPort(seleniumPort)}/wd/hub");
 
         var options = new ChromeOptions();
-        //options.AddArgument("--headless=new");
+        options.AddArgument("--headless=new");
 
         driver = new RemoteWebDriver(enderecoSelenium, options);
     }
@@ -187,5 +188,4 @@ public abstract class TestFixture
         if (seleniumContainer is not null)
             await seleniumContainer.DisposeAsync();
     }
-    
 }
