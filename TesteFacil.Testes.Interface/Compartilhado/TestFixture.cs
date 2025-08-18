@@ -163,7 +163,7 @@ public abstract class TestFixture
         var enderecoSelenium = new Uri($"http://{seleniumContainer.Hostname}:{seleniumContainer.GetMappedPublicPort(seleniumPort)}/wd/hub");
 
         var options = new ChromeOptions();
-        options.AddArgument("--headless=new");
+        //options.AddArgument("--headless=new");
 
         driver = new RemoteWebDriver(enderecoSelenium, options);
     }
