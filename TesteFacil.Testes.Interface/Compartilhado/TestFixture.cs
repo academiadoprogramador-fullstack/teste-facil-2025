@@ -52,7 +52,7 @@ public abstract class TestFixture
     [AssemblyCleanup]
     public static async Task EncerrarTestes()
     {
-        EncerrarWebDriverAsync();
+        await EncerrarWebDriverAsync();
 
         await EncerrarAplicacaoAsync();
 
@@ -100,7 +100,6 @@ public abstract class TestFixture
           .Build();
 
         await dbContainer.StartAsync();
-
     }
 
     private static async Task InicializarAplicacaoAsync()
@@ -115,8 +114,7 @@ public abstract class TestFixture
 
         await imagem.CreateAsync().ConfigureAwait(false);
 
-        // Configura a connection string para a rede:
-        // "Host=teste-facil-e2e-testdb;Port=5432;Database=TesteFacilDb;Username=postgres;Password=YourStrongPassword"
+        // Configura a connection string para a rede: "Host=teste-facil-e2e-testdb;Port=5432;Database=TesteFacilDb;Username=postgres;Password=YourStrongPassword"
         var connectionStringRede = dbContainer?.GetConnectionString()
             .Replace(dbContainer.Hostname, "teste-facil-e2e-testdb")
             .Replace(dbContainer.GetMappedPublicPort(dbPort).ToString(), dbPort.ToString());
@@ -163,7 +161,6 @@ public abstract class TestFixture
         var enderecoSelenium = new Uri($"http://{seleniumContainer.Hostname}:{seleniumContainer.GetMappedPublicPort(seleniumPort)}/wd/hub");
 
         var options = new ChromeOptions();
-        //options.AddArgument("--headless=new");
 
         driver = new RemoteWebDriver(enderecoSelenium, options);
     }
