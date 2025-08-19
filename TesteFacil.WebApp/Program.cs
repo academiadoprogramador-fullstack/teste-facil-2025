@@ -1,3 +1,4 @@
+using TesteFacil.Aplicacao.ModuloAutenticacao;
 using TesteFacil.Aplicacao.ModuloDisciplina;
 using TesteFacil.Aplicacao.ModuloMateria;
 using TesteFacil.Aplicacao.ModuloQuestao;
@@ -23,6 +24,7 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Services.AddScoped<AutenticacaoService>();
         builder.Services.AddScoped<DisciplinaAppService>();
         builder.Services.AddScoped<MateriaAppService>();
         builder.Services.AddScoped<QuestaoAppService>();
@@ -31,7 +33,10 @@ public class Program
         builder.Services.AddScoped<IRepositorioMateria, RepositorioMateriaEmOrm>();
         builder.Services.AddScoped<IRepositorioQuestao, RepositorioQuestaoEmOrm>();
         builder.Services.AddScoped<IRepositorioTeste, RepositorioTesteEmOrm>();
+
         builder.Services.AddEntityFrameworkConfig(builder.Configuration);
+        builder.Services.AddIdentityProviderConfig();
+        builder.Services.AddJwtAuthenticationConfig();
 
         builder.Services.AddSerilogConfig(builder.Logging, builder.Configuration);
         builder.Services.AddQuestPDFConfig();
@@ -63,6 +68,9 @@ public class Program
         app.UseRouting();
 
         app.MapHealthChecks("/health");
+
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.MapDefaultControllerRoute();
 

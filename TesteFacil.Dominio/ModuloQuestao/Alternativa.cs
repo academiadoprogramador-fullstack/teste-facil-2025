@@ -3,6 +3,8 @@
 public class Alternativa
 {
     public Guid Id { get; set; }
+    public Guid? UsuarioId { get; set; }
+
     public char Letra { get; set; }
     public string Resposta { get; set; }
     public bool Correta { get; set; }
