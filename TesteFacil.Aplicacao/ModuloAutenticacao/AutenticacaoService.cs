@@ -19,7 +19,7 @@ public class AutenticacaoService
         this.signInManager = signInManager;
     }
 
-    public async Task<Result> Cadastrar(Usuario usuario, string senha)
+    public async Task<Result> RegistrarAsync(Usuario usuario, string senha)
     {
         var usuarioResult = await userManager.CreateAsync(usuario, senha);
 
@@ -46,7 +46,7 @@ public class AutenticacaoService
         return Result.Ok();
     }
 
-    public async Task<Result> Autenticar(string email, string senha)
+    public async Task<Result> LoginAsync(string email, string senha)
     {
         var resultadoLogin = await signInManager.PasswordSignInAsync(
             email,
@@ -61,7 +61,7 @@ public class AutenticacaoService
         return Result.Ok();
     }
 
-    public async Task<Result> Logout()
+    public async Task<Result> LogoutAsync()
     {
         await signInManager.SignOutAsync();
 

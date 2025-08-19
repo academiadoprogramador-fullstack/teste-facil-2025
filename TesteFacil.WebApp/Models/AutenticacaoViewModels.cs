@@ -12,6 +12,7 @@ public class RegistroViewModel
     public string? Senha { get; set; }
 
     [Required(ErrorMessage = "O campo \"Confirmação da Senha\" é obrigatório.")]
+    [Compare(nameof(Senha), ErrorMessage = "O campo \"Confirmação da Senha\" não é igual à senha.")]
     public string? ConfirmarSenha { get; set; }
 
     public RegistroViewModel() { }

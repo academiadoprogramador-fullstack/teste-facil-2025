@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TesteFacil.Infraestrutura.Orm.Compartilhado;
@@ -11,9 +12,11 @@ using TesteFacil.Infraestrutura.Orm.Compartilhado;
 namespace TesteFacil.Infraestrutura.Orm.Migrations
 {
     [DbContext(typeof(TesteFacilDbContext))]
-    partial class TesteFacilDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250819122346_Add_Auth")]
+    partial class Add_Auth
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

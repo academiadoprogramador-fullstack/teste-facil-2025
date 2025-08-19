@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TesteFacil.Aplicacao.ModuloAutenticacao;
+using TesteFacil.Dominio.ModuloAutenticacao;
 using TesteFacil.WebApp.Models;
 
 namespace TesteFacil.WebApp.Controllers;
@@ -22,11 +23,36 @@ public class AutenticacaoController : Controller
         return View(registroVm);
     }
 
+    [HttpPost("registro")]
+    public async Task<IActionResult> Registro(RegistroViewModel registroVm)
+    {
+        var usuario = new Usuario
+        {
+            UserName = registroVm.Email,
+            Email = registroVm.Email,
+        };
+
+        var resultado = await autenticacaoService.RegistrarAsync(usuario, registroVm.Senha!);
+
+        if (resultado.IsFailed)
+            return RedirectToAction(nameof(Registro));
+
+        return RedirectToAction(nameof(HomeController.Index), "Home", new { area = string.Empty });
+    }
+
     [HttpGet("login")]
     public IActionResult Login()
     {
         var loginVm = new LoginViewModel();
 
         return View(loginVm);
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await autenticacaoService.LogoutAsync();
+
+        return RedirectToAction(nameof(Login));
     }
 }
